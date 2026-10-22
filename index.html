@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MedCof + Centros Acadêmicos</title>
+<meta name="description" content="Parceria MedCof com Centros e Diretórios Acadêmicos de Medicina: cadastro da entidade e registro de eventos.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CA</text></svg>">
+</head>
+<body>
+<header class="pub-top"><div class="wrap row">
+  <a class="logo" href="/">Med<b>Cof</b> · Centros Acadêmicos</a>
+  <span class="spacer"></span>
+  <button class="btn ghost sm" onclick="toggleTheme()" aria-label="Alternar tema">◐</button>
+  <a class="btn sm" href="/painel">Área da equipe</a>
+</div></header>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="badge b-novo">Parceria MedCof + CAs/DAs</span>
+    <h1 style="margin-top:14px">A MedCof junto com o seu <span class="grad">Centro Acadêmico</span></h1>
+    <p class="lead">Cadastre sua entidade e registre os eventos da gestão. Assim a gente se programa com antecedência para apoiar com conteúdo, simulados, brindes e presença nos eventos.</p>
+    <div class="row" style="margin-top:22px">
+      <a class="btn primary" href="/cadastro">Cadastrar meu CA/DA</a>
+      <a class="btn" href="/eventos">Registrar um evento</a>
+    </div>
+  </section>
+
+  <h2 style="font-size:20px">Como funciona</h2>
+  <div class="steps">
+    <div class="step"><b>Cadastre a entidade</b><br><span class="muted small">Dados do CA/DA, da gestão atual, canais e endereço para envio de brindes.</span></div>
+    <div class="step"><b>Receba seu código</b><br><span class="muted small">Ao concluir, você recebe um código único de 4 caracteres (também enviamos pelo WhatsApp).</span></div>
+    <div class="step"><b>Registre os eventos</b><br><span class="muted small">Com o código, envie cada evento com pelo menos 45 dias de antecedência. A equipe analisa e retorna pelo WhatsApp.</span></div>
+  </div>
+
+  <div class="benefits">
+    <div class="benefit"><div class="ic">✦</div><h3>Simulados</h3><p>Simulados MedCof aplicados pelo CA para os alunos.</p></div>
+    <div class="benefit"><div class="ic">🎁</div><h3>Brindes</h3><p>Brindes e sorteios nos eventos aprovados.</p></div>
+    <div class="benefit"><div class="ic">🎤</div><h3>Presença</h3><p>Stand, palestras e ativações da MedCof nos eventos.</p></div>
+    <div class="benefit"><div class="ic">📣</div><h3>Conteúdo</h3><p>Divulgação conjunta nas redes do CA e da MedCof.</p></div>
+  </div>
+
+  <div class="card" style="margin-bottom:40px">
+    <h3 style="font-size:16px">Antes de registrar um evento</h3>
+    <ul class="muted" style="margin:0;padding-left:18px">
+      <li>Envie um formulário por evento.</li>
+      <li>Informe o público estimado e em que se baseou (edições anteriores, nº de inscritos, turmas…).</li>
+      <li>Eventos com público pequeno ou pouco alinhado ao perfil MedCof podem não ser aprovados.</li>
+    </ul>
+  </div>
+</main>
+<footer class="footer">MedCof Educação S.A · Seus dados são usados apenas para a parceria institucional, conforme a LGPD.</footer>
+<script src="/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="/common.js"></script>
+</body>
+</html>

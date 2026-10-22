@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel CAs · MedCof</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CA</text></svg>">
+</head>
+<body>
+<!-- Login -->
+<div id="authView" class="auth hidden">
+  <div class="card">
+    <a class="logo" href="/">Med<b>Cof</b> · Painel CAs</a>
+    <p class="muted small" style="margin:6px 0 18px">Área interna da equipe MedCof.</p>
+    <form id="authForm">
+      <div class="field hidden" id="nameField"><label>Seu nome</label><input name="nome" autocomplete="name"></div>
+      <div class="field"><label>E-mail</label><input name="email" type="email" required autocomplete="email"></div>
+      <div class="field"><label>Senha</label><input name="senha" type="password" required minlength="6" autocomplete="current-password"></div>
+      <div id="authErr" class="alert err hidden" style="margin-bottom:12px"></div>
+      <div id="authOk" class="alert ok hidden" style="margin-bottom:12px"></div>
+      <button class="btn primary" style="width:100%;justify-content:center" id="authBtn">Entrar</button>
+    </form>
+    <p class="small muted" style="margin:14px 0 0;text-align:center"><a href="#" id="toggleAuth">Criar conta</a> · <a href="#" id="forgot">Esqueci a senha</a></p>
+  </div>
+</div>
+
+<!-- Aguardando aprovação -->
+<div id="pendingView" class="auth hidden">
+  <div class="card" style="text-align:center">
+    <div style="font-size:36px">⏳</div>
+    <h2>Aguardando aprovação</h2>
+    <p class="muted">Sua conta foi criada. Um administrador precisa liberar seu acesso ao painel.</p>
+    <button class="btn" onclick="logout()">Sair</button>
+  </div>
+</div>
+
+<!-- App -->
+<div id="appView" class="app hidden">
+  <aside class="side">
+    <a class="logo" href="/">Med<b>Cof</b> · CAs</a>
+    <button class="nav on" data-view="home">◧ Visão geral</button>
+    <button class="nav" data-view="cas">🏛 Centros acadêmicos</button>
+    <button class="nav" data-view="pipeline">▦ Funil de parcerias</button>
+    <button class="nav" data-view="eventos">📅 Eventos <span class="count hidden" id="pendCount"></span></button>
+    <button class="nav ownerOnly hidden" data-view="equipe">👥 Equipe <span class="count hidden" id="teamCount"></span></button>
+    <span class="spacer"></span>
+    <a class="nav" href="/cadastro" target="_blank">↗ Form. de cadastro</a>
+    <a class="nav" href="/eventos" target="_blank">↗ Form. de eventos</a>
+    <button class="nav" onclick="toggleTheme()">◐ Tema</button>
+    <div class="small muted" style="padding:8px 10px" id="whoami"></div>
+    <button class="nav" onclick="logout()">⎋ Sair</button>
+  </aside>
+  <div>
+    <nav class="mobile-nav">
+      <button class="nav on" data-view="home">Visão geral</button>
+      <button class="nav" data-view="cas">CAs</button>
+      <button class="nav" data-view="pipeline">Funil</button>
+      <button class="nav" data-view="eventos">Eventos</button>
+      <button class="nav ownerOnly hidden" data-view="equipe">Equipe</button>
+      <button class="nav" onclick="logout()">Sair</button>
+    </nav>
+    <main class="main" id="main"><div class="empty">Carregando…</div></main>
+  </div>
+</div>
+
+<div id="drawerRoot"></div>
+<div id="modalRoot"></div>
+
+<script src="/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="/common.js"></script>
+<script src="/painel.js"></script>
+</body>
+</html>
