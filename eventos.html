@@ -30,7 +30,7 @@
         <button class="btn primary" type="submit" id="codeBtn">Continuar</button>
       </form>
       <div id="codeErr" class="alert err hidden" style="margin-top:12px"></div>
-      <p class="small muted" style="margin:14px 0 0">Ainda não cadastrou seu CA? <a href="/cadastro">Faça o cadastro</a>.</p>
+      <p class="small muted" style="margin:14px 0 0">Ainda não é parceiro? <a href="/interesse">Manifeste interesse</a>. Já tem acesso? Use a <a href="/ca">Área do CA</a>.</p>
     </div>
 
     <!-- Passo 2: evento -->
@@ -44,9 +44,10 @@
       </div>
       <div class="grid g2">
         <div class="field"><label>Público estimado *</label><input name="publico_estimado" required inputmode="numeric" placeholder="Ex.: 200"></div>
-        <div class="field"><label>Público majoritário *</label>
-          <select name="publico_majoritario" required><option value="">Escolha…</option><option>Ciclo Básico</option><option>Ciclo Clínico</option><option>Internato</option><option>Mesclado</option></select></div>
+        <div class="field"><label>Link da planilha de inscritos</label><input name="link_inscritos" type="url" maxlength="500" placeholder="docs.google.com/spreadsheets/…"><div class="small muted">Deixe como “qualquer pessoa com o link pode ver” — contamos os inscritos automaticamente.</div></div>
       </div>
+      <div class="field"><label>Quais anos vão estar mais presentes? * <span class="muted small">(marque um ou mais)</span></label>
+        <div class="chips" id="ciclos"></div></div>
       <div class="field"><label>Em que você se baseou para o público estimado? *</label><textarea name="base_publico" required maxlength="600" placeholder="Ex.: edição anterior teve 180 inscritos; nº de alunos da turma…"></textarea></div>
       <div class="field"><label>Em que você se baseou para o público majoritário? *</label><textarea name="base_majoritario" required maxlength="600"></textarea></div>
       <div class="field"><label>Informações adicionais</label><textarea name="info" maxlength="3000" placeholder="Programação, local, o que esperam da MedCof (stand, palestrante, brindes, simulado…)"></textarea></div>
@@ -73,6 +74,7 @@
 <script src="/common.js"></script>
 <script>
 let CODE = null;
+$("#ciclos").innerHTML = CICLOS.map((c) => `<label class="chip"><input type="checkbox" name="ciclos[]" value="${c}"> ${c}</label>`).join("");
 async function checkCode(c) {
   const err = $("#codeErr"); err.classList.add("hidden");
   c = (c || "").trim().toUpperCase();
@@ -101,6 +103,7 @@ $("#evForm").addEventListener("submit", async (ev) => {
   const bad = $$("[required]", f).find((el) => !el.value.trim());
   if (bad) { err.textContent = "Preencha os campos obrigatórios (*)."; err.classList.remove("hidden"); bad.focus(); return; }
   const p = formToObject(f); p.codigo = CODE;
+  if (!p.ciclos || !p.ciclos.length) { err.textContent = "Marque quais anos vão estar mais presentes."; err.classList.remove("hidden"); return; }
   $("#evBtn").disabled = true; $("#evBtn").textContent = "Enviando…";
   try {
     const { error } = await sb.rpc("ca_registrar_evento", { p });

@@ -46,8 +46,15 @@
     <button class="nav" data-view="cas">🏛 Centros acadêmicos</button>
     <button class="nav" data-view="pipeline">▦ Funil de parcerias</button>
     <button class="nav" data-view="eventos">📅 Eventos <span class="count hidden" id="pendCount"></span></button>
+    <button class="nav" data-view="mapa">🗺 Mapa do Brasil</button>
+    <button class="nav" data-view="contratos">📄 Contratos <span class="count hidden" id="ctCount"></span></button>
+    <button class="nav" data-view="postagens">📸 Postagens <span class="count hidden" id="postCount"></span></button>
+    <button class="nav" data-view="reunioes">🤝 Reuniões <span class="count hidden" id="reuCount"></span></button>
+    <button class="nav" data-view="engajamento">🏆 Engajamento</button>
     <button class="nav ownerOnly hidden" data-view="equipe">👥 Equipe <span class="count hidden" id="teamCount"></span></button>
     <span class="spacer"></span>
+    <a class="nav" href="/manual" target="_blank">↗ Manual do CA</a>
+    <a class="nav" href="/interesse" target="_blank">↗ Form. de interesse</a>
     <a class="nav" href="/cadastro" target="_blank">↗ Form. de cadastro</a>
     <a class="nav" href="/eventos" target="_blank">↗ Form. de eventos</a>
     <button class="nav" onclick="toggleTheme()">◐ Tema</button>
@@ -60,6 +67,11 @@
       <button class="nav" data-view="cas">CAs</button>
       <button class="nav" data-view="pipeline">Funil</button>
       <button class="nav" data-view="eventos">Eventos</button>
+      <button class="nav" data-view="mapa">Mapa</button>
+      <button class="nav" data-view="contratos">Contratos</button>
+      <button class="nav" data-view="postagens">Posts</button>
+      <button class="nav" data-view="reunioes">Reuniões</button>
+      <button class="nav" data-view="engajamento">Ranking</button>
       <button class="nav ownerOnly hidden" data-view="equipe">Equipe</button>
       <button class="nav" onclick="logout()">Sair</button>
     </nav>
@@ -73,6 +85,9 @@
 <script src="/config.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="/common.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/admin.js"></script>
 <script src="/painel.js"></script>
 </body>
 </html>

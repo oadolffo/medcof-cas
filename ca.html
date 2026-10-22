@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Área do CA · MedCof</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><text x='16' y='22' font-size='16' text-anchor='middle' fill='white' font-family='Arial' font-weight='700'>CA</text></svg>">
+</head>
+<body>
+<!-- Login / cadastro de acesso -->
+<div id="authView" class="auth hidden">
+  <div class="card">
+    <a class="logo" href="/">Med<b>Cof</b> · Área do CA</a>
+    <p class="muted small" style="margin:6px 0 18px">Para CAs/DAs parceiros: eventos, inscritos, postagens e reuniões.</p>
+    <form id="authForm">
+      <div id="signupFields" class="hidden">
+        <div class="field"><label>Código do CA</label><input name="codigo" maxlength="4" placeholder="Ex.: 5TC2" style="text-transform:uppercase;letter-spacing:.12em;font-weight:700"><div class="small muted">O código de 4 caracteres que a MedCof enviou ao CA.</div></div>
+        <div class="grid g2"><div class="field"><label>Seu nome</label><input name="nome" autocomplete="name"></div><div class="field"><label>Cargo</label><input name="cargo" placeholder="Presidente…"></div></div>
+      </div>
+      <div class="field"><label>E-mail</label><input name="email" type="email" required autocomplete="email"></div>
+      <div class="field"><label>Senha</label><input name="senha" type="password" required minlength="6" autocomplete="current-password"></div>
+      <div id="authErr" class="alert err hidden" style="margin-bottom:12px"></div>
+      <div id="authOk" class="alert ok hidden" style="margin-bottom:12px"></div>
+      <button class="btn primary" style="width:100%;justify-content:center" id="authBtn">Entrar</button>
+    </form>
+    <p class="small muted" style="margin:14px 0 0;text-align:center"><a href="#" id="toggleAuth">Primeiro acesso? Criar conta com o código do CA</a><br><a href="#" id="forgot">Esqueci a senha</a></p>
+    <p class="small muted" style="text-align:center;margin:10px 0 0">Ainda não é parceiro? <a href="/interesse">Manifeste interesse</a></p>
+  </div>
+</div>
+
+<div id="teamView" class="auth hidden"><div class="card" style="text-align:center">
+  <h2>Você é da equipe MedCof</h2><p class="muted">Esta área é dos CAs. A equipe usa o painel interno.</p>
+  <div class="row" style="justify-content:center"><a class="btn primary" href="/painel">Ir para o painel</a><button class="btn" onclick="logout()">Sair</button></div>
+</div></div>
+
+<div id="appView" class="hidden">
+  <header class="pub-top"><div class="wrap row">
+    <a class="logo" href="/">Med<b>Cof</b> · Área do CA</a><span class="spacer"></span>
+    <a class="btn ghost sm" href="/manual" target="_blank">📘 Manual</a>
+    <button class="btn ghost sm" onclick="toggleTheme()" aria-label="Alternar tema">◐</button>
+    <button class="btn sm" onclick="logout()">Sair</button>
+  </div></header>
+  <main class="wrap">
+    <div class="ca-top"><div style="flex:1;min-width:0"><div class="small muted" id="caSub"></div><h1 style="margin:0;font-size:26px" id="caTitle"></h1></div><span id="caBadge"></span></div>
+    <div class="ca-tabs" id="tabs"></div>
+    <div id="view" style="padding-bottom:50px"></div>
+  </main>
+</div>
+<div id="modalRoot"></div>
+
+<script src="/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="/common.js"></script>
+<script src="/ca.js"></script>
+</body>
+</html>

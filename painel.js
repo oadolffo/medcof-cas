@@ -1,7 +1,7 @@
 /* Painel interno — fluxo dos Centros Acadêmicos */
 const STATUS_CA = {
-  novo: "Novo cadastro", contato: "Em contato", reuniao: "Reunião", proposta: "Proposta",
-  ativa: "Parceria ativa", pausada: "Pausada", perdida: "Perdida",
+  interesse: "Interesse", novo: "Cadastro completo", contato: "Em contato", reuniao: "Reunião", proposta: "Proposta",
+  ativa: "Parceria ativa", pausada: "Pausada", perdida: "Perdida", encerrada: "Contrato encerrado",
 };
 const STATUS_EV = { pendente: "Pendente", solicitado: "Solicitado", recusado: "Recusado", realizado: "Realizado", cancelado: "Cancelado" };
 const EV_BADGE = { pendente: "b-proposta", solicitado: "b-novo", recusado: "b-perdida", realizado: "b-ativa", cancelado: "b-pausada" };
@@ -79,7 +79,7 @@ async function boot(session) {
   $$(".ownerOnly").forEach((el) => el.classList.toggle("hidden", !isOwner()));
   await loadAll();
   const h = location.hash.replace("#", "");
-  go(["home", "cas", "pipeline", "eventos", "equipe"].includes(h) ? h : "home");
+  go(["home", "cas", "pipeline", "eventos", "equipe", ...Object.keys(window.EXTRA_VIEWS || {})].includes(h) ? h : "home");
 }
 
 /* ================= DATA ================= */
@@ -91,6 +91,7 @@ async function loadAll() {
   ]);
   if (c.error) toast("Erro ao carregar: " + errMsg(c.error));
   S.team = t.data || []; S.cas = c.data || []; S.eventos = e.data || [];
+  if (window.loadExtra) await window.loadExtra();
   const pend = S.eventos.filter((x) => x.status === "pendente").length;
   $$("#pendCount").forEach((el) => { el.textContent = pend; el.classList.toggle("hidden", !pend); });
   const waiting = S.team.filter((x) => x.role === "pending").length;
@@ -102,7 +103,7 @@ $$("[data-view]").forEach((b) => b.addEventListener("click", () => go(b.dataset.
 function go(v) {
   S.view = v; location.hash = v;
   $$("[data-view]").forEach((b) => b.classList.toggle("on", b.dataset.view === v));
-  ({ home: renderHome, cas: renderCas, pipeline: renderPipeline, eventos: renderEventos, equipe: renderEquipe }[v] || renderHome)();
+  ({ home: renderHome, cas: renderCas, pipeline: renderPipeline, eventos: renderEventos, equipe: renderEquipe, ...(window.EXTRA_VIEWS || {}) }[v] || renderHome)();
 }
 function refresh() { return loadAll().then(() => go(S.view)); }
 
@@ -148,14 +149,14 @@ function renderHome() {
   </div>
   <div class="card" style="margin-top:14px"><h3 style="font-size:16px">Funil de parcerias</h3><div class="funnel">
     ${Object.entries(STATUS_CA).map(([k, l]) => { const n = S.cas.filter((c) => c.status === k).length; const max = Math.max(1, ...Object.keys(STATUS_CA).map((s) => S.cas.filter((c) => c.status === s).length)); return `<div class="fbar"><span>${l}</span><div class="track"><div class="fill" style="width:${(n / max) * 100}%"></div></div><b>${n}</b></div>`; }).join("")}
-  </div></div>`;
+  </div></div>${window.homeExtra ? window.homeExtra() : ""}`;
 }
 function evLine(e) {
   const c = caById(e.centro_id) || {};
   const d = daysUntil(e.data_inicio);
   return `<div class="li" onclick="openEvento('${e.id}')">
     <div style="width:46px;text-align:center"><div style="font-weight:800;font-size:18px;line-height:1">${e.data_inicio ? e.data_inicio.slice(8, 10) : "—"}</div><div class="small muted">${e.data_inicio ? ["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"][+e.data_inicio.slice(5, 7) - 1] : ""}</div></div>
-    <div style="flex:1;min-width:0"><div class="t">${esc(e.nome)}</div><div class="small muted">${esc(c.sigla || "")} · ${e.publico_estimado ?? "?"} pessoas · ${esc(e.publico_majoritario || "")}${d !== null && d >= 0 ? ` · em ${d}d` : ""}</div></div>
+    <div style="flex:1;min-width:0"><div class="t">${esc(e.nome)}</div><div class="small muted">${esc(c.sigla || "")} · ${e.publico_estimado ?? "?"} pessoas · ${esc((e.ciclos || []).join(", ") || e.publico_majoritario || "")}${e.link_inscritos ? ` · 👥 ${e.inscritos_atual ?? "?"} inscritos` : ""}${d !== null && d >= 0 ? ` · em ${d}d` : ""}</div></div>
     <span class="badge ${EV_BADGE[e.status]}">${STATUS_EV[e.status]}</span></div>`;
 }
 
@@ -254,7 +255,7 @@ async function openCA(id, tab) {
         ${waLink(c.rep_whatsapp) ? `<a class="btn sm" target="_blank" onclick="markCodeSent('${c.id}')" href="${waLink(c.rep_whatsapp, `Oi, ${(c.rep_nome || "").split(" ")[0]}! O código do ${c.sigla} na parceria MedCof é *${c.codigo}*. Use-o para registrar os eventos do CA aqui: ${location.origin}/eventos?codigo=${c.codigo}`)}">🔑 Enviar código ${esc(c.codigo)}</a>` : ""}
         ${c.instagram ? `<a class="btn sm" target="_blank" href="https://instagram.com/${encodeURIComponent(c.instagram.replace(/^@/, ""))}">📸 Instagram</a>` : ""}
       </div>
-      <div class="tabs">${[["resumo", "Acompanhamento"], ["dados", "Dados do CA"], ["contatos", "Contatos"], ["eventos", "Eventos"], ["historico", "Histórico"]].map(([k, l]) => `<button class="tab ${drawerTab === k ? "on" : ""}" onclick="openCA('${c.id}','${k}')">${l}</button>`).join("")}</div>
+      <div class="tabs">${[["resumo", "Acompanhamento"], ["dados", "Dados do CA"], ["contatos", "Contatos"], ["eventos", "Eventos"], ...(window.EXTRA_TABS_LIST || []), ["historico", "Histórico"]].map(([k, l]) => `<button class="tab ${drawerTab === k ? "on" : ""}" onclick="openCA('${c.id}','${k}')">${l}</button>`).join("")}</div>
     </div><div class="drawer-body" id="drawerBody"><div class="empty">Carregando…</div></div></div>`;
   const body = $("#drawerBody");
   if (drawerTab === "resumo") body.innerHTML = tabResumo(c);
@@ -262,6 +263,7 @@ async function openCA(id, tab) {
   if (drawerTab === "eventos") body.innerHTML = tabEventos(c);
   if (drawerTab === "contatos") await tabContatos(c, body);
   if (drawerTab === "historico") await tabHistorico(c, body);
+  if (window.EXTRA_TABS && window.EXTRA_TABS[drawerTab]) await window.EXTRA_TABS[drawerTab](c, body);
 }
 window.openCA = openCA;
 async function markCodeSent(id) { await updateCA(id, { codigo_enviado: true }); }
@@ -459,6 +461,7 @@ function openEvento(id, centroId) {
     <div><label>Público estimado</label><input name="publico_estimado" inputmode="numeric" value="${e.publico_estimado ?? ""}" ${dis}></div>
     <div><label>Público majoritário</label><select name="publico_majoritario" ${dis}><option value=""></option>${["Ciclo Básico", "Ciclo Clínico", "Internato", "Mesclado"].map((o) => `<option ${e.publico_majoritario === o ? "selected" : ""}>${o}</option>`).join("")}</select></div>
   </div>
+  ${id ? `<div class="card small" style="padding:12px;margin:12px 0;box-shadow:none"><b>Anos presentes:</b> ${esc((e.ciclos || []).join(", ") || "—")}<br><b>Inscritos:</b> ${e.link_inscritos ? `<b>${e.inscritos_atual ?? "?"}</b>${e.inscritos_atualizado_em ? " (" + fmtDateTime(e.inscritos_atualizado_em) + ")" : ""} · <a href="${esc(e.link_inscritos)}" target="_blank">planilha</a> · <a href="#" onclick="atualizarInscritosAdm('${e.id}');return false">atualizar contagem</a>` : "sem link"}</div>` : ""}
   ${e.base_publico || e.base_majoritario ? `<div class="card small" style="padding:12px;margin:12px 0;background:var(--surface-2);box-shadow:none"><b>Base do público:</b> ${esc(e.base_publico || "—")}<br><b>Base do público majoritário:</b> ${esc(e.base_majoritario || "—")}</div>` : ""}
   <div class="field" style="margin-top:12px"><label>Informações do evento</label><textarea name="info" ${dis}>${esc(e.info || "")}</textarea></div>
   <h3 style="font-size:15px">Análise MedCof</h3>
@@ -534,3 +537,10 @@ async function removeMember(uid) {
 Object.assign(window, { setRole, removeMember });
 
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") { if ($("#modalRoot").innerHTML) $("#modalRoot").innerHTML = ""; else if ($("#drawerRoot").innerHTML) closeDrawer(); } });
+
+async function atualizarInscritosAdm(id) {
+  const e = S.eventos.find((x) => x.id === id);
+  try { const n = await contarInscritos(e.link_inscritos); await sb.rpc("ca_evento_inscritos", { p_evento: id, p_link: null, p_qtd: n }); toast(n + " inscritos"); await refresh(); openEvento(id); }
+  catch (err) { toast(errMsg(err), 5000); }
+}
+window.atualizarInscritosAdm = atualizarInscritosAdm;

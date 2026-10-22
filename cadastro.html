@@ -24,6 +24,8 @@
     <form id="f" class="card" novalidate>
       <div class="hp" aria-hidden="true"><label>Site <input name="website" tabindex="-1" autocomplete="off"></label></div>
 
+      <div class="field" id="codeRow"><label>Código do CA (se você já manifestou interesse)</label><input name="codigo" id="codigo" maxlength="4" placeholder="Ex.: 5TC2" style="text-transform:uppercase;letter-spacing:.12em;font-weight:700;max-width:180px"><div class="small muted" id="codeInfo">Com o código, completamos o cadastro que você já começou.</div></div>
+      <input type="hidden" name="escola_ref" id="escolaRef"><input type="hidden" name="lat" id="escLat"><input type="hidden" name="lng" id="escLng">
       <h3 style="font-size:16px">1. Entidade</h3>
       <div class="grid g3">
         <div class="field"><label>Sigla *</label><input name="sigla" required maxlength="40" placeholder="Ex.: CAPF"></div>
@@ -35,11 +37,11 @@
         <div class="field"><label>Telefone da entidade</label><input name="telefone_entidade" class="phone" inputmode="tel"></div>
       </div>
       <div class="grid g3">
-        <div class="field" style="grid-column:span 3"><label>Faculdade *</label><input name="faculdade" required maxlength="200"></div>
+        <div class="field" style="grid-column:span 3"><label>Faculdade *</label><input name="faculdade" id="faculdade" required maxlength="200" placeholder="Comece a digitar o nome ou a sigla da faculdade"></div>
       </div>
       <div class="grid g3">
-        <div class="field" style="grid-column:span 2"><label>Cidade da faculdade *</label><input name="cidade" required maxlength="120"></div>
-        <div class="field"><label>Estado *</label><select name="uf" required class="uf"></select></div>
+        <div class="field" style="grid-column:span 2"><label>Cidade da faculdade *</label><input name="cidade" id="cidadeFac" required maxlength="120"></div>
+        <div class="field"><label>Estado *</label><select name="uf" id="ufFac" required class="uf"></select></div>
       </div>
       <div class="grid g3">
         <div class="field"><label>A entidade possui CNPJ?</label><select name="tem_cnpj" id="temCnpj"><option value="">—</option><option value="true">Sim</option><option value="false">Não</option></select></div>
@@ -146,6 +148,18 @@
 <script src="/common.js"></script>
 <script>
 $$(".uf").forEach((s) => fillUF(s));
+attachEscolaPicker($("#faculdade"), { cidade: $("#cidadeFac"), uf: $("#ufFac"), ref: $("#escolaRef"), lat: $("#escLat"), lng: $("#escLng") });
+async function preencherCodigo(c) {
+  c = (c || "").trim().toUpperCase(); if (c.length !== 4) return;
+  const { data } = await sb.rpc("ca_validar_codigo", { p_codigo: c });
+  if (!data) { $("#codeInfo").innerHTML = `<span class="late">Código não encontrado.</span>`; return; }
+  $("#codeInfo").innerHTML = `✅ Completando o cadastro de <b>${esc(data.sigla)}</b>${data.cadastro_completo ? " (já completo — enviar de novo atualiza os dados)" : ""}`;
+  const f = $("#f");
+  for (const k of ["sigla", "nome", "faculdade", "cidade", "uf", "tipo", "instagram"]) if (data[k] && f[k] && !f[k].value) f[k].value = data[k];
+}
+$("#codigo").addEventListener("blur", (e) => preencherCodigo(e.target.value));
+const qc = new URLSearchParams(location.search).get("codigo");
+if (qc) { $("#codigo").value = qc; preencherCodigo(qc); }
 $$(".phone").forEach(maskPhone);
 $("#temCnpj").addEventListener("change", (e) => ($("#cnpjField").style.display = e.target.value === "true" ? "" : "none"));
 
