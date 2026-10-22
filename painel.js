@@ -116,7 +116,7 @@ function renderHome() {
   const pubProx = prox.reduce((a, e) => a + (e.publico_estimado || 0), 0);
   const gestao = S.cas.filter((c) => { const d = daysUntil(c.gestao_fim); return d !== null && d <= 60 && !["perdida"].includes(c.status); })
     .sort((a, b) => (a.gestao_fim || "").localeCompare(b.gestao_fim || ""));
-  const semCodigo = S.cas.filter((c) => !c.codigo_enviado && c.status !== "perdida");
+  const semCodigo = S.cas.filter((c) => ["ativa", "novo", "interesse", "proposta"].includes(c.status) && !c.codigo_enviado && !(S.usuarios || []).some((u) => u.centro_id === c.id));
   const acoes = S.cas.filter((c) => c.proxima_acao_data && daysUntil(c.proxima_acao_data) <= 3).sort((a, b) => a.proxima_acao_data.localeCompare(b.proxima_acao_data));
   const alunos = ativos.reduce((a, c) => a + (c.alunos_cobertos || 0), 0);
 
@@ -143,7 +143,7 @@ function renderHome() {
     <div class="card"><h3 style="font-size:16px">Pendências da equipe</h3>
       <div class="list">
       ${acoes.map((c) => `<div class="li" onclick="openCA('${c.id}')"><span>📌</span><div style="flex:1"><div class="t">${esc(c.sigla)} · ${esc(c.proxima_acao || "Próxima ação")}</div><div class="small ${daysUntil(c.proxima_acao_data) < 0 ? "late" : "muted"}">${fmtDate(c.proxima_acao_data)}</div></div></div>`).join("")}
-      ${semCodigo.map((c) => `<div class="li" onclick="openCA('${c.id}')"><span>🔑</span><div style="flex:1"><div class="t">Enviar código para ${esc(c.sigla)}</div><div class="small muted">Código ${esc(c.codigo)} ainda não marcado como enviado</div></div></div>`).join("")}
+      ${semCodigo.map((c) => `<div class="li" onclick="openCA('${c.id}')"><span>🔑</span><div style="flex:1"><div class="t">Convidar ${esc(c.sigla)} para a Área do CA</div><div class="small muted">Ninguém do CA criou acesso ainda${c.rep_email ? " · " + esc(c.rep_email) : " · sem e-mail cadastrado"}</div></div></div>`).join("")}
       ${!acoes.length && !semCodigo.length ? `<div class="empty">Tudo em dia</div>` : ""}
       </div></div>
   </div>
@@ -164,7 +164,7 @@ function evLine(e) {
 function filteredCas() {
   const f = S.filters, q = (f.q || "").toLowerCase();
   return S.cas.filter((c) =>
-    (!q || [c.sigla, c.nome, c.faculdade, c.cidade, c.rep_nome, c.codigo].join(" ").toLowerCase().includes(q)) &&
+    (!q || [c.sigla, c.nome, c.faculdade, c.cidade, c.rep_nome, c.rep_email].join(" ").toLowerCase().includes(q)) &&
     (!f.status || c.status === f.status) && (!f.uf || c.uf === f.uf) && (!f.resp || c.responsavel_id === f.resp));
 }
 function renderCas() {
@@ -174,7 +174,7 @@ function renderCas() {
     <button class="btn" onclick="exportCasCSV()">⬇ CSV</button>
     ${canWrite() ? `<button class="btn primary" onclick="openNewCA()">＋ Novo CA</button>` : ""}</div>
   <div class="filters">
-    <input type="search" placeholder="Buscar por sigla, faculdade, representante, código…" value="${esc(S.filters.q || "")}" oninput="S.filters.q=this.value;renderCasTable()">
+    <input type="search" placeholder="Buscar por sigla, faculdade, representante, e-mail…" value="${esc(S.filters.q || "")}" oninput="S.filters.q=this.value;renderCasTable()">
     <select onchange="S.filters.status=this.value;renderCasTable()"><option value="">Todos os status</option>${Object.entries(STATUS_CA).map(([k, l]) => `<option value="${k}" ${S.filters.status === k ? "selected" : ""}>${l}</option>`).join("")}</select>
     <select onchange="S.filters.uf=this.value;renderCasTable()"><option value="">Todas as UFs</option>${[...new Set(S.cas.map((c) => c.uf))].sort().map((u) => `<option ${S.filters.uf === u ? "selected" : ""}>${u}</option>`).join("")}</select>
     <select onchange="S.filters.resp=this.value;renderCasTable()"><option value="">Qualquer responsável</option>${S.team.filter((t) => t.role !== "pending").map((t) => `<option value="${t.user_id}" ${S.filters.resp === t.user_id ? "selected" : ""}>${esc(t.nome || t.email)}</option>`).join("")}</select>
@@ -184,7 +184,7 @@ function renderCas() {
 }
 function renderCasTable() {
   const list = filteredCas();
-  $("#casTable").innerHTML = `<table class="tbl"><thead><tr><th>Entidade</th><th>Local</th><th>Status</th><th>Representante</th><th>Gestão até</th><th>Eventos</th><th>Código</th></tr></thead><tbody>
+  $("#casTable").innerHTML = `<table class="tbl"><thead><tr><th>Entidade</th><th>Local</th><th>Status</th><th>Representante</th><th>Gestão até</th><th>Eventos</th><th>Área do CA</th></tr></thead><tbody>
   ${list.map((c) => {
     const evs = S.eventos.filter((e) => e.centro_id === c.id);
     const fut = evs.filter((e) => daysUntil(e.data_inicio) >= 0 && !["recusado", "cancelado"].includes(e.status)).length;
@@ -196,7 +196,7 @@ function renderCasTable() {
       <td class="small">${esc(c.rep_nome)}<div class="muted">${esc(c.rep_cargo || "")}</div></td>
       <td class="small ${dg !== null && dg <= 30 ? "late" : ""}">${fmtDate(c.gestao_fim)}</td>
       <td class="small">${evs.length} <span class="muted">(${fut} futuros)</span></td>
-      <td><code>${esc(c.codigo)}</code> ${c.codigo_enviado ? "" : `<span class="badge b-proposta" title="Código ainda não enviado">não enviado</span>`}</td></tr>`;
+      <td class="small">${(S.usuarios || []).filter((u) => u.centro_id === c.id).length ? `<span class="badge b-ativa">${(S.usuarios || []).filter((u) => u.centro_id === c.id).length} acesso(s)</span>` : c.codigo_enviado ? `<span class="badge b-novo">convidado</span>` : `<span class="badge b-proposta">sem acesso</span>`}</td></tr>`;
   }).join("") || `<tr><td colspan="7" class="empty">Nenhum CA encontrado</td></tr>`}</tbody></table>`;
 }
 function csvDownload(name, rows) {
@@ -206,7 +206,7 @@ function csvDownload(name, rows) {
   a.download = name; a.click();
 }
 function exportCasCSV() {
-  const cols = ["sigla", "nome", "faculdade", "cidade", "uf", "status", "codigo", "rep_nome", "rep_cargo", "rep_email", "rep_whatsapp", "instagram", "alunos_cobertos", "alunos_grupos", "gestao_inicio", "gestao_fim", "entrega_nome", "entrega_telefone", "entrega_logradouro", "entrega_complemento", "entrega_bairro", "entrega_cidade", "entrega_uf", "entrega_cep", "cupom", "proxima_acao", "proxima_acao_data", "notas"];
+  const cols = ["sigla", "nome", "faculdade", "cidade", "uf", "status", "rep_nome", "rep_cargo", "rep_email", "rep_whatsapp", "instagram", "alunos_cobertos", "alunos_grupos", "gestao_inicio", "gestao_fim", "entrega_nome", "entrega_telefone", "entrega_logradouro", "entrega_complemento", "entrega_bairro", "entrega_cidade", "entrega_uf", "entrega_cep", "cupom", "proxima_acao", "proxima_acao_data", "notas"];
   csvDownload("centros-academicos.csv", [cols, ...filteredCas().map((c) => cols.map((k) => c[k]))]);
 }
 
@@ -252,7 +252,7 @@ async function openCA(id, tab) {
       <button class="btn ghost" onclick="closeDrawer()" aria-label="Fechar">✕</button></div>
       <div class="row" style="margin-top:10px;gap:6px">
         ${waLink(c.rep_whatsapp) ? `<a class="btn sm" target="_blank" href="${waLink(c.rep_whatsapp, `Oi, ${(c.rep_nome || "").split(" ")[0]}! Aqui é da equipe MedCof.`)}">💬 WhatsApp ${esc((c.rep_nome || "").split(" ")[0])}</a>` : ""}
-        ${waLink(c.rep_whatsapp) ? `<a class="btn sm" target="_blank" onclick="markCodeSent('${c.id}')" href="${waLink(c.rep_whatsapp, `Oi, ${(c.rep_nome || "").split(" ")[0]}! O código do ${c.sigla} na parceria MedCof é *${c.codigo}*. Use-o para registrar os eventos do CA aqui: ${location.origin}/eventos?codigo=${c.codigo}`)}">🔑 Enviar código ${esc(c.codigo)}</a>` : ""}
+        ${waLink(c.rep_whatsapp) ? `<a class="btn sm" target="_blank" onclick="markCodeSent('${c.id}')" href="${waLink(c.rep_whatsapp, `Oi, ${(c.rep_nome || "").split(" ")[0]}! A Área do CA da parceria MedCof já está liberada para o ${c.sigla}: ${location.origin}/ca — clique em “Primeiro acesso”, use o e-mail ${c.rep_email || "cadastrado"} e crie sua senha. Lá vocês completam o cadastro, registram eventos, postagens e veem o Manual do CA.`)}">🔑 Convidar para a Área do CA</a>` : ""}
         ${c.instagram ? `<a class="btn sm" target="_blank" href="https://instagram.com/${encodeURIComponent(c.instagram.replace(/^@/, ""))}">📸 Instagram</a>` : ""}
       </div>
       <div class="tabs">${[["resumo", "Acompanhamento"], ["dados", "Dados do CA"], ["contatos", "Contatos"], ["eventos", "Eventos"], ...(window.EXTRA_TABS_LIST || []), ["historico", "Histórico"]].map(([k, l]) => `<button class="tab ${drawerTab === k ? "on" : ""}" onclick="openCA('${c.id}','${k}')">${l}</button>`).join("")}</div>
@@ -283,8 +283,8 @@ function tabResumo(c) {
     </div>
     <div class="grid g3">
       <div><label>Cupom da entidade</label><input name="cupom" value="${esc(c.cupom || "")}" ${dis}></div>
-      <div><label>Código</label><input value="${esc(c.codigo)}" disabled></div>
-      <div><label>Código enviado?</label><select name="codigo_enviado" ${dis}><option value="true" ${c.codigo_enviado ? "selected" : ""}>Sim</option><option value="false" ${!c.codigo_enviado ? "selected" : ""}>Não</option></select></div>
+      <div><label>Acessos à Área do CA</label><input value="${(S.usuarios || []).filter((u) => u.centro_id === c.id).length}" disabled></div>
+      <div><label>Convite enviado?</label><select name="codigo_enviado" ${dis}><option value="true" ${c.codigo_enviado ? "selected" : ""}>Sim</option><option value="false" ${!c.codigo_enviado ? "selected" : ""}>Não</option></select></div>
     </div>
     <div id="perdaWrap" class="${c.status === "perdida" ? "" : "hidden"}"><label>Motivo da perda</label><input name="motivo_perda" value="${esc(c.motivo_perda || "")}" ${dis}></div>
     <div><label>Notas internas</label><textarea name="notas" rows="4" ${dis}>${esc(c.notas || "")}</textarea></div>
@@ -364,7 +364,7 @@ function tabEventos(c) {
 }
 async function tabContatos(c, body) {
   const { data } = await sb.from("ca_contatos").select("*").eq("centro_id", c.id).order("principal", { ascending: false }).order("created_at");
-  body.innerHTML = `<div class="list">${(data || []).map((k) => `<div class="li" style="cursor:default"><div style="flex:1;min-width:0"><div class="t">${esc(k.nome)} ${k.principal ? `<span class="badge b-novo">principal</span>` : ""}</div><div class="small muted">${esc(k.cargo || "")}${k.email ? " · " + esc(k.email) : ""}${k.whatsapp ? " · " + esc(k.whatsapp) : ""}</div></div>
+  body.innerHTML = `<p class="small muted" style="margin-top:0">Quem tiver o e-mail cadastrado aqui (ou como representante) pode criar acesso na Área do CA.</p><div class="list">${(data || []).map((k) => `<div class="li" style="cursor:default"><div style="flex:1;min-width:0"><div class="t">${esc(k.nome)} ${k.principal ? `<span class="badge b-novo">principal</span>` : ""}</div><div class="small muted">${esc(k.cargo || "")}${k.email ? " · " + esc(k.email) : ""}${k.whatsapp ? " · " + esc(k.whatsapp) : ""}</div></div>
     ${waLink(k.whatsapp) ? `<a class="btn sm" target="_blank" href="${waLink(k.whatsapp)}">💬</a>` : ""}${k.email ? `<a class="btn sm" href="mailto:${esc(k.email)}">✉️</a>` : ""}
     ${canWrite() ? `<button class="btn sm ghost danger" onclick="delContato('${k.id}','${c.id}')" aria-label="Remover">✕</button>` : ""}</div>`).join("") || `<div class="empty">Sem contatos</div>`}</div>
   ${canWrite() ? `<form class="card" style="margin-top:14px;padding:14px" onsubmit="addContato(event,'${c.id}')"><label>Novo contato</label>
@@ -388,7 +388,7 @@ async function tabHistorico(c, body) {
 /* ================= NOVO CA ================= */
 function openNewCA() {
   $("#modalRoot").innerHTML = `<div class="modal" onclick="if(event.target===this)this.remove()"><div class="card"><h2 style="font-size:18px">Novo centro acadêmico</h2>
-  <p class="small muted" style="margin-top:-6px">Cadastro rápido feito pela equipe. O código é gerado automaticamente; o restante dá pra completar depois ou pedir ao CA que preencha o formulário público.</p>
+  <p class="small muted" style="margin-top:-6px">Cadastro rápido feito pela equipe. O CA pode completar o resto na Área do CA, entrando com o e-mail do representante.</p>
   <form id="newCA"><div class="grid g2">
     <div><label>Sigla *</label><input name="sigla" required></div><div><label>Tipo</label><select name="tipo"><option>CA</option><option>DA</option><option>Diretório Científico</option><option>Atlética</option><option>Liga</option><option>Outro</option></select></div>
     <div style="grid-column:span 2"><label>Nome *</label><input name="nome" required></div>

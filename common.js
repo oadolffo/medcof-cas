@@ -121,13 +121,14 @@
   /* Autocomplete de faculdade num input + preenche cidade/UF/escola_ref */
   async function attachEscolaPicker(input, { cidade, uf, ref, lat, lng } = {}) {
     const escolas = await loadEscolas();
-    const box = document.createElement("div"); box.className = "ac-box hidden"; input.parentElement.style.position = "relative"; input.parentElement.appendChild(box);
+    const box = document.createElement("div"); box.className = "ac-box hidden"; if (getComputedStyle(input.parentElement).position === "static") input.parentElement.style.position = "relative"; input.parentElement.appendChild(box);
     input.setAttribute("autocomplete", "off");
     const pick = (e) => {
       input.value = e.nome; box.classList.add("hidden");
       if (cidade) cidade.value = e.cidade; if (uf) uf.value = e.uf; if (ref) ref.value = e.id; if (lat) lat.value = e.lat; if (lng) lng.value = e.lng;
     };
     input.addEventListener("input", () => {
+      if (input.dataset.manual === "1") return box.classList.add("hidden");
       if (ref) ref.value = "";
       const q = norm(input.value); if (q.length < 2) return box.classList.add("hidden");
       const hits = escolas.filter((e) => norm(`${e.nome} ${e.sigla || ""} ${e.cidade} ${e.uf}`).includes(q)).slice(0, 8);

@@ -10,8 +10,9 @@ $("#toggleAuth").addEventListener("click", (e) => {
   e.preventDefault(); signup = !signup;
   $("#signupFields").classList.toggle("hidden", !signup);
   $("#authBtn").textContent = signup ? "Criar acesso" : "Entrar";
-  e.target.textContent = signup ? "Já tenho conta" : "Primeiro acesso? Criar conta com o código do CA";
+  e.target.textContent = signup ? "Já tenho conta" : "Primeiro acesso? Criar minha senha";
 });
+{ const qe = new URLSearchParams(location.search).get("email"); if (qe) $("#authForm").email.value = qe; if (location.hash === "#criar") $("#toggleAuth").click(); }
 const authMsg = (m, ok) => { $("#authErr").classList.toggle("hidden", !!ok); $("#authOk").classList.toggle("hidden", !ok); $(ok ? "#authOk" : "#authErr").textContent = m; };
 $("#forgot").addEventListener("click", async (e) => {
   e.preventDefault();
@@ -24,13 +25,13 @@ $("#authForm").addEventListener("submit", async (e) => {
   e.preventDefault(); const f = e.target; $("#authBtn").disabled = true;
   try {
     if (signup) {
-      const codigo = f.codigo.value.trim().toUpperCase();
-      const { data: ok } = await sb.rpc("ca_validar_codigo", { p_codigo: codigo });
-      if (!ok) throw new Error("Código do CA não encontrado. Confira com a equipe MedCof.");
-      const { data, error } = await sb.auth.signUp({ email: f.email.value.trim(), password: f.senha.value,
-        options: { data: { tipo: "ca", codigo, nome: f.nome.value.trim(), cargo: f.cargo.value.trim() }, emailRedirectTo: location.origin + "/ca" } });
+      const email = f.email.value.trim();
+      const { data: ok } = await sb.rpc("ca_email_tem_acesso", { p_email: email });
+      if (!ok?.ok) throw new Error("Este e-mail não está cadastrado em nenhum CA. Use o e-mail do formulário de interesse ou peça para a MedCof incluir você nos contatos do CA.");
+      const { data, error } = await sb.auth.signUp({ email, password: f.senha.value,
+        options: { data: { tipo: "ca", nome: f.nome.value.trim(), cargo: f.cargo.value.trim() }, emailRedirectTo: location.origin + "/ca" } });
       if (error) throw error;
-      if (!data.session) authMsg(`Acesso criado para ${ok.sigla}! Confirme pelo link que enviamos ao seu e-mail e depois entre.`, true);
+      if (!data.session) authMsg("Acesso criado! Confirme pelo link que enviamos ao seu e-mail e depois entre.", true);
     } else {
       const { error } = await sb.auth.signInWithPassword({ email: f.email.value.trim(), password: f.senha.value });
       if (error) throw error;
@@ -60,12 +61,12 @@ async function boot(session) {
   if (!link) {
     const { data: tm } = await sb.from("team_members").select("role").eq("user_id", R.user.id).maybeSingle();
     if (tm) return show("teamView");
-    show("authView"); return authMsg("Esta conta não está ligada a nenhum CA. Crie o acesso com o código do CA.");
+    show("authView"); return authMsg("Esta conta não está ligada a nenhum CA. Fale com a equipe MedCof.");
   }
   show("appView");
   await load(link.centro_id);
   const h = location.hash.replace("#", "");
-  go(["inicio", "eventos", "postagens", "reunioes", "dados"].includes(h) ? h : "inicio");
+  go(["inicio", "eventos", "postagens", "reunioes", "dados", "manual"].includes(h) ? h : (R.centro.cadastro_completo ? "inicio" : "dados"));
 }
 
 async function load(cid) {
@@ -78,15 +79,15 @@ async function load(cid) {
   ]);
   R.centro = c.data; R.eventos = e.data || []; R.posts = p.data || []; R.metas = m.data || []; R.reunioes = r.data || [];
   $("#caTitle").textContent = R.centro.sigla + " · " + (R.centro.nome || "");
-  $("#caSub").textContent = `${R.centro.faculdade || ""} · ${R.centro.cidade || ""}/${R.centro.uf || ""} · código ${R.centro.codigo}`;
+  $("#caSub").textContent = `${R.centro.faculdade || ""} · ${R.centro.cidade || ""}/${R.centro.uf || ""}`;
   $("#caBadge").innerHTML = `<span class="badge b-${R.centro.status}">${STATUS_CA_L[R.centro.status] || R.centro.status}</span>`;
 }
 
-const TABS = [["inicio", "Início"], ["eventos", "Eventos"], ["postagens", "Postagens"], ["reunioes", "Reuniões"], ["dados", "Dados do CA"]];
+const TABS = [["inicio", "Início"], ["eventos", "Eventos"], ["postagens", "Postagens"], ["reunioes", "Reuniões"], ["dados", "Cadastro do CA"], ["manual", "Manual do CA"]];
 function go(t) {
   R.tab = t; location.hash = t;
   $("#tabs").innerHTML = TABS.map(([k, l]) => `<button class="${k === t ? "on" : ""}" onclick="go('${k}')">${l}</button>`).join("");
-  ({ inicio: vInicio, eventos: vEventos, postagens: vPostagens, reunioes: vReunioes, dados: vDados }[t])();
+  ({ inicio: vInicio, eventos: vEventos, postagens: vPostagens, reunioes: vReunioes, dados: vDados, manual: vManual }[t])();
 }
 window.go = go;
 const reload = async (t) => { await load(R.centro.id); go(t || R.tab); };
@@ -113,7 +114,7 @@ function vInicio() {
   const gest = daysUntil(R.centro.gestao_fim);
   $("#view").innerHTML = `
   ${gest !== null && gest <= 45 ? `<div class="alert info" style="margin-bottom:14px">🔄 A gestão termina em ${gest < 0 ? "breve (data já passou)" : gest + " dias"} (${fmtDate(R.centro.gestao_fim)}). Combine com a MedCof a passagem de bastão para a nova diretoria e atualize os dados do CA.</div>` : ""}
-  ${R.centro.status === "interesse" || !R.centro.cadastro_completo ? `<div class="alert info" style="margin-bottom:14px">📝 Falta completar o cadastro do CA (gestão, canais e endereço para brindes). <a href="/cadastro?codigo=${R.centro.codigo}">Completar agora</a></div>` : ""}
+  ${R.centro.status === "interesse" || !R.centro.cadastro_completo ? `<div class="alert info" style="margin-bottom:14px">📝 Falta completar o cadastro do CA (gestão, canais e endereço para brindes). <a href="#" onclick="go('dados');return false">Completar agora</a></div>` : ""}
   <div class="kpis">
     <div class="kpi"><div class="v">${evFut.length}</div><div class="l">Eventos futuros</div></div>
     <div class="kpi"><div class="v">${R.posts.filter((p) => p.status !== "recusado").length}</div><div class="l">Postagens registradas</div></div>
@@ -229,18 +230,64 @@ function vReunioes() {
   });
 }
 
-/* ---------- Dados ---------- */
+/* ---------- Cadastro completo do CA ---------- */
 function vDados() {
   const c = R.centro;
-  const F = (k, l, t = "text", span) => `<div class="field" ${span ? 'style="grid-column:span 2"' : ""}><label>${l}</label><input name="${k}" type="${t}" value="${esc(c[k] ?? "")}"></div>`;
-  $("#view").innerHTML = `<form class="card" id="dadosForm" style="max-width:860px">
-    <h3 style="font-size:16px">Gestão e canais</h3><div class="grid g3">${F("gestao_inicio", "Início da gestão", "date")}${F("gestao_fim", "Término da gestão", "date")}${F("instagram", "Instagram")}${F("seguidores", "Seguidores")}${F("alunos_cobertos", "Alunos alcançados")}${F("alunos_grupos", "Alunos nos grupos")}</div>
-    <h3 style="font-size:16px">Representante da parceria</h3><div class="grid g2">${F("rep_nome", "Nome")}${F("rep_cargo", "Cargo")}${F("rep_email", "E-mail", "email")}${F("rep_whatsapp", "WhatsApp")}</div>
-    <h3 style="font-size:16px">Endereço para brindes</h3><div class="grid g3">${F("entrega_nome", "Destinatário")}${F("entrega_telefone", "Telefone")}${F("entrega_cep", "CEP")}${F("entrega_logradouro", "Rua/Av. + número", "text", 1)}${F("entrega_complemento", "Complemento")}${F("entrega_bairro", "Bairro")}${F("entrega_cidade", "Cidade")}${F("entrega_uf", "UF")}</div>
-    <button class="btn primary">Salvar</button> <span class="small muted">Mudou a gestão? Atualize aqui e avise a MedCof.</span></form>`;
-  $("#dadosForm").addEventListener("submit", async (ev) => {
-    ev.preventDefault(); const p = formToObject(ev.target);
-    const { error } = await sb.rpc("ca_atualizar_meus_dados", { p });
-    if (error) return toast(errMsg(error)); toast("Dados salvos"); reload("dados");
+  const I = (k, l, o = {}) => `<div class="field" ${o.span ? `style="grid-column:span ${o.span}"` : ""}><label for="d_${k}">${l}${o.req ? " *" : ""}</label><input id="d_${k}" name="${k}" type="${o.type || "text"}" value="${esc(c[k] ?? "")}" ${o.req ? "required" : ""} ${o.ph ? `placeholder="${o.ph}"` : ""} ${o.cls ? `class="${o.cls}"` : ""}></div>`;
+  const S = (k, l, opts, o = {}) => `<div class="field"><label for="d_${k}">${l}</label><select id="d_${k}" name="${k}" ${o.cls ? `class="${o.cls}"` : ""}>${opts.map(([v, t]) => `<option value="${v}" ${String(c[k] ?? "") === String(v) ? "selected" : ""}>${t}</option>`).join("")}</select></div>`;
+  const sn = [["", "—"], ["true", "Sim"], ["false", "Não"]];
+  $("#view").innerHTML = `<form class="card" id="dadosForm" novalidate style="max-width:900px">
+    ${!c.cadastro_completo ? `<div class="alert info" style="margin-bottom:14px">Complete o cadastro do CA. Leva uns 5 minutos e é com ele que a MedCof organiza eventos e brindes.</div>` : ""}
+    <input type="hidden" name="escola_ref" id="d_escola_ref" value="${esc(c.escola_ref || "")}">
+    <h3 style="font-size:16px">1. Entidade</h3>
+    <div class="grid g3">${I("nome", "Nome completo da entidade", { req: 1, span: 2 })}${S("tipo", "Tipo", ["CA", "DA", "Diretório Científico", "DCE", "Atlética", "Liga", "Outro"].map((x) => [x, x]))}</div>
+    <div class="grid g3">${I("faculdade", "Faculdade", { req: 1, span: 2 })}${I("cidade", "Cidade", { req: 1 })}</div>
+    <div class="grid g3"><div class="field"><label for="d_uf">Estado *</label><select id="d_uf" name="uf" class="uf"></select></div>${I("email_entidade", "E-mail da entidade", { type: "email" })}${I("telefone_entidade", "Telefone da entidade", { cls: "phone" })}</div>
+    <div class="grid g3">${S("tem_cnpj", "Possui CNPJ?", sn)}${I("cnpj", "CNPJ", { span: 2 })}</div>
+    <div class="form-sec"><h3>2. Gestão atual</h3>
+      <div class="grid g3">${I("gestao_inicio", "Início da gestão", { type: "date" })}${I("gestao_fim", "Término previsto", { type: "date", req: 1 })}${S("troca_gestao", "Troca de gestão", [["", "—"], ["Anualmente", "Anualmente"], ["Semestralmente", "Semestralmente"], ["A cada 2 anos", "A cada 2 anos"], ["Outra", "Outra"]])}</div>
+      <div class="grid g3">${I("tamanho_gestao", "Pessoas na gestão", { ph: "Ex.: 20 diretores + 40 membros" })}${I("alunos_cobertos", "Alunos alcançados pelo CA", { req: 1 })}${I("alunos_cobertos_obs", "Obs. sobre os alunos", { ph: "Ex.: 1º ao 4º ano" })}</div></div>
+    <div class="form-sec"><h3>3. Canais</h3>
+      <div class="grid g3">${I("instagram", "Instagram oficial", { req: 1, ph: "@seuca" })}${I("seguidores", "Seguidores (aprox.)")}${I("outros_canais", "Outros canais (TikTok, site…)")}</div>
+      <div class="grid g3">${S("tem_grupo", "Grupo de WhatsApp com alunos?", sn)}${I("alunos_grupos", "Alunos nos grupos")}${I("alunos_grupos_obs", "Obs. sobre os grupos")}</div></div>
+    <div class="form-sec"><h3>4. Representante da parceria</h3>
+      <div class="grid g3">${I("rep_nome", "Nome completo", { req: 1 })}${I("rep_cargo", "Cargo", { req: 1 })}${I("rep_cpf", "CPF")}</div>
+      <div class="grid g2">${I("rep_email", "E-mail", { type: "email", req: 1 })}${I("rep_whatsapp", "WhatsApp", { req: 1, cls: "phone" })}</div></div>
+    <div class="form-sec"><h3>5. Endereço para envio de brindes</h3>
+      <div class="grid g3">${I("entrega_nome", "Destinatário", { req: 1 })}${I("entrega_telefone", "Telefone", { req: 1, cls: "phone" })}${I("entrega_cpf", "CPF do destinatário")}</div>
+      <div class="grid g3">${I("entrega_cep", "CEP", { req: 1 })}${I("entrega_logradouro", "Rua/Av. + número", { req: 1, span: 2 })}</div>
+      <div class="grid g3">${I("entrega_complemento", "Complemento")}${I("entrega_bairro", "Bairro", { req: 1 })}${I("entrega_cidade", "Cidade", { req: 1 })}</div>
+      <div class="grid g3"><div class="field"><label for="d_entrega_uf">Estado *</label><select id="d_entrega_uf" name="entrega_uf" class="uf"></select></div>${I("entrega_email", "E-mail do destinatário", { type: "email" })}</div></div>
+    <div class="form-sec"><h3>6. Observações</h3><textarea name="observacoes_ca" maxlength="2000">${esc(c.observacoes_ca || "")}</textarea>
+      <label class="chip" style="display:flex;margin-top:10px"><input type="checkbox" name="declaracao" data-bool ${c.declaracao ? "checked" : ""}> Declaro que as informações são verdadeiras e que tenho autorização para responder em nome da entidade. *</label></div>
+    <div id="dErr" class="alert err hidden" style="margin-top:14px"></div>
+    <button class="btn primary" style="margin-top:14px" id="dBtn">Salvar cadastro</button></form>`;
+  $$("#dadosForm .uf").forEach((s) => fillUF(s));
+  $("#d_uf").value = c.uf || ""; $("#d_entrega_uf").value = c.entrega_uf || "";
+  $$("#dadosForm .phone").forEach(maskPhone);
+  attachEscolaPicker($("#d_faculdade"), { cidade: $("#d_cidade"), uf: $("#d_uf"), ref: $("#d_escola_ref") });
+  $("#d_entrega_cep").addEventListener("blur", async (e) => {
+    const d = onlyDigits(e.target.value); if (d.length !== 8) return;
+    try { const j = await (await fetch(`https://viacep.com.br/ws/${d}/json/`)).json(); if (j.erro) return;
+      if (!$("#d_entrega_logradouro").value) $("#d_entrega_logradouro").value = j.logradouro ? j.logradouro + ", " : "";
+      if (!$("#d_entrega_bairro").value) $("#d_entrega_bairro").value = j.bairro || ""; if (!$("#d_entrega_cidade").value) $("#d_entrega_cidade").value = j.localidade || "";
+      $("#d_entrega_uf").value = j.uf || ""; } catch (_) {}
   });
+  $("#dadosForm").addEventListener("submit", async (ev) => {
+    ev.preventDefault(); const f = ev.target, err = $("#dErr"); err.classList.add("hidden");
+    const bad = $$("[required]", f).find((el) => !el.value.trim()) || (!f.uf.value && f.uf) || (!f.entrega_uf.value && f.entrega_uf);
+    if (bad) { err.textContent = "Preencha os campos obrigatórios (*)."; err.classList.remove("hidden"); bad.focus(); return; }
+    if (!f.declaracao.checked) { err.textContent = "Marque a declaração de veracidade."; err.classList.remove("hidden"); return; }
+    $("#dBtn").disabled = true;
+    try { const { error } = await sb.rpc("ca_cadastro", { p: formToObject(f) }); if (error) throw error; toast("Cadastro salvo"); reload("inicio"); }
+    catch (e) { err.textContent = errMsg(e); err.classList.remove("hidden"); }
+    finally { $("#dBtn").disabled = false; }
+  });
+}
+
+/* ---------- Manual (só com login) ---------- */
+async function vManual() {
+  $("#view").innerHTML = `<div class="empty">Carregando o manual…</div>`;
+  const { data } = await sb.from("ca_docs").select("html").eq("slug", "manual").maybeSingle();
+  $("#view").innerHTML = data ? `<article class="manual card">${data.html}</article>` : `<div class="empty">Manual indisponível no momento.</div>`;
 }

@@ -6,13 +6,14 @@ const REU_ST = { solicitada: "Solicitada pelo CA", agendada: "Agendada", realiza
 const REU_B = { solicitada: "b-proposta", agendada: "b-novo", realizada: "b-ativa", cancelada: "b-pausada" };
 
 window.loadExtra = async function () {
-  const [k, m, p, r] = await Promise.all([
+  const [k, m, p, r, u] = await Promise.all([
     sb.from("ca_contratos").select("*").order("vigencia_fim", { ascending: false }),
     sb.from("ca_metas_post").select("*"),
     sb.from("ca_posts").select("*").order("data_post", { ascending: false }),
     sb.from("ca_reunioes").select("*").order("data_hora"),
+    sb.from("ca_usuarios").select("user_id,centro_id,email,nome,created_at"),
   ]);
-  S.contratos = k.data || []; S.metas = m.data || []; S.posts = p.data || []; S.reunioes = r.data || [];
+  S.contratos = k.data || []; S.metas = m.data || []; S.posts = p.data || []; S.reunioes = r.data || []; S.usuarios = u.data || [];
   const venc = S.contratos.filter((c) => { const d = daysUntil(c.vigencia_fim); return d !== null && d >= 0 && d <= 60; }).length;
   const postPend = S.posts.filter((x) => x.status === "enviado").length;
   const reuSol = S.reunioes.filter((x) => x.status === "solicitada").length;

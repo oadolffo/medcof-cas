@@ -14,7 +14,7 @@
 <header class="pub-top"><div class="wrap row">
   <a class="logo" href="/">Med<b>Cof</b> · Centros Acadêmicos</a>
   <span class="spacer"></span>
-  <a class="btn ghost sm" href="/manual">Manual do CA</a>
+  <a class="btn ghost sm" href="/ca">Área do CA</a>
   <button class="btn ghost sm" onclick="toggleTheme()" aria-label="Alternar tema">◐</button>
   <a class="btn sm" href="/painel">Área da equipe</a>
 </div></header>
@@ -26,7 +26,7 @@
     <p class="lead">Do primeiro contato aos eventos da gestão: um só lugar para o CA conversar com a MedCof, registrar eventos, informar inscritos, acompanhar postagens e reuniões.</p>
   </section>
 
-  <div class="paths">
+  <div class="paths" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
     <a class="path" href="/interesse">
       <div class="ic">🤝</div><h3>Quero ser parceiro</h3>
       <p>Seu CA ainda não tem parceria? Conte rapidinho quem vocês são. Em seguida a equipe MedCof entra em contato para uma reunião.</p>
@@ -34,20 +34,15 @@
     </a>
     <a class="path" href="/ca">
       <div class="ic">🏛</div><h3>Já sou parceiro</h3>
-      <p>Entre na Área do CA para cadastrar eventos, mandar o link dos inscritos, registrar as postagens e ver as reuniões agendadas.</p>
+      <p>Entre na Área do CA com o e-mail cadastrado para completar o cadastro, registrar eventos, mandar o link dos inscritos, registrar postagens, ver reuniões e ler o Manual do CA.</p>
       <span class="go">Entrar na Área do CA →</span>
-    </a>
-    <a class="path" href="/manual">
-      <div class="ic">📘</div><h3>Manual do CA</h3>
-      <p>Como funciona a parceria, prazos, regras de postagem, brindes, eventos, troca de gestão e perguntas frequentes.</p>
-      <span class="go">Ler o manual →</span>
     </a>
   </div>
 
   <h2 style="font-size:20px">Como funciona</h2>
   <div class="steps">
-    <div class="step"><b>1. Interesse</b><br><span class="muted small">O CA preenche o formulário inicial e recebe um código único.</span></div>
-    <div class="step"><b>2. Reunião e cadastro</b><br><span class="muted small">Conversamos, alinhamos a proposta e o CA completa o cadastro.</span></div>
+    <div class="step"><b>1. Interesse</b><br><span class="muted small">O CA preenche o formulário inicial com os dados básicos.</span></div>
+    <div class="step"><b>2. Reunião e cadastro</b><br><span class="muted small">Conversamos, alinhamos a proposta e o CA completa o cadastro na Área do CA.</span></div>
     <div class="step"><b>3. Parceria ativa</b><br><span class="muted small">Contrato assinado: eventos, inscritos, postagens e reuniões pela Área do CA.</span></div>
   </div>
 
@@ -58,11 +53,7 @@
     <div class="benefit"><div class="ic">📣</div><h3>Conteúdo</h3><p>Divulgação conjunta nas redes do CA e da MedCof.</p></div>
   </div>
 
-  <div class="card" style="margin-bottom:40px">
-    <h3 style="font-size:16px">Já tem o código do CA?</h3>
-    <p class="muted" style="margin-top:0">Complete o cadastro do CA ou registre um evento rápido sem entrar na Área do CA.</p>
-    <div class="row"><a class="btn" href="/cadastro">Completar cadastro</a><a class="btn" href="/eventos">Registrar evento com o código</a></div>
-  </div>
+<div style="height:30px"></div>
 </main>
 <footer class="footer">MedCof Educação S.A · Seus dados são usados apenas para a parceria institucional, conforme a LGPD.</footer>
 <script src="/config.js"></script>
