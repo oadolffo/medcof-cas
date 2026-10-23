@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proposta · Grupo MedCof</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/proposta.css">
+<link rel="icon" href="/img/furacao-vermelho.png">
+<style>
+  body{margin:0;background:#e9e9ec;font-family:Inter,system-ui,sans-serif}
+  .bar{position:sticky;top:0;z-index:5;display:flex;gap:10px;align-items:center;padding:12px 16px;background:rgba(255,255,255,.85);backdrop-filter:blur(16px);border-bottom:1px solid #ddd}
+  .bar b{flex:1;font-size:14px}
+  .bar button,.bar a{font:600 14px Inter,sans-serif;padding:9px 16px;border-radius:99px;border:1px solid #ccc;background:#fff;color:#111;text-decoration:none;cursor:pointer}
+  .bar .pri{background:#e2263c;border-color:#e2263c;color:#fff}
+  .wrap{max-width:1100px;margin:24px auto 60px;padding:0 16px}
+  .msg{max-width:520px;margin:80px auto;text-align:center;color:#555}
+  @media print{.wrap{max-width:none;margin:0;padding:0}}
+</style>
+</head>
+<body>
+<div class="bar no-print"><b id="tt">Proposta</b><a href="/painel">Voltar ao painel</a><button class="pri" onclick="window.print()">Baixar PDF</button></div>
+<div class="wrap" id="out"><p class="msg">Carregando…</p></div>
+<script src="/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="/common.js"></script>
+<script src="/proposta.js"></script>
+<script>
+(async () => {
+  const q = new URLSearchParams(location.search);
+  const out = document.getElementById("out");
+  let dados = null;
+  const id = q.get("id");
+  if (id) {
+    const { data: s } = await sb.auth.getSession();
+    if (!s.session) { out.innerHTML = '<p class="msg">Entre no <a href="/painel">painel</a> para ver esta proposta.</p>'; return; }
+    const { data, error } = await sb.from("ca_propostas").select("*").eq("id", id).single();
+    if (error || !data) { out.innerHTML = '<p class="msg">Proposta não encontrada.</p>'; return; }
+    dados = data.dados;
+  } else {
+    try { dados = JSON.parse(sessionStorage.getItem("proposta_draft") || "null"); } catch (_) {}
+    if (!dados) dados = Proposta.defaults({ sigla: "DEMO", nome: "Centro Acadêmico Demonstração", faculdade: "Faculdade de Medicina", alunos_cobertos: 900 });
+  }
+  document.title = `MedCof & ${dados.sigla || "CA"} · Proposta`;
+  document.getElementById("tt").textContent = `MedCof & ${dados.sigla || "CA"}`;
+  out.innerHTML = Proposta.render(dados);
+  if (q.get("print") === "1") {
+    await Promise.all([...document.images].map((im) => im.complete ? 0 : new Promise((r) => { im.onload = im.onerror = r; })));
+    if (document.fonts) await document.fonts.ready;
+    setTimeout(() => window.print(), 300);
+  }
+})();
+</script>
+</body>
+</html>

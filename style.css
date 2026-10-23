@@ -412,3 +412,42 @@ input::placeholder,textarea::placeholder{color:var(--ink-3)}
 .more{margin:8px 10px 0;color:var(--ink-3);font-size:13px}
 .zero{display:flex;flex-direction:column;align-items:center;gap:4px;padding:30px 0;color:var(--ink-3)}
 .zero b{color:var(--ink)}.zero .zi{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--ok-bg);color:var(--ok);font-size:22px;margin-bottom:6px}
+
+/* ===== Gerador de propostas ===== */
+.pb-fab{position:fixed;right:24px;bottom:24px;z-index:35;display:inline-flex;align-items:center;gap:8px;padding:14px 20px;border-radius:999px;border:0;background:#e2263c;color:#fff;font-family:inherit;font-weight:600;font-size:15px;line-height:1;cursor:pointer;box-shadow:0 10px 30px rgba(226,38,60,.35),0 2px 6px rgba(0,0,0,.12);transition:transform .2s,box-shadow .2s}
+.pb-fab:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(226,38,60,.42)}
+.pb-fab svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pb{position:fixed;inset:0;z-index:70;background:var(--bg);display:flex;flex-direction:column}
+.pb-top{display:flex;align-items:center;gap:10px;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--glass,var(--surface));backdrop-filter:saturate(180%) blur(20px)}
+.pb-top b{font-size:16px}
+.pb-top select{width:auto;max-width:280px}
+.pb-body{flex:1;min-height:0;display:grid;grid-template-columns:minmax(340px,440px) 1fr}
+.pb-left{overflow-y:auto;border-right:1px solid var(--line);background:var(--surface)}
+.pb-right{overflow-y:auto;padding:24px;background:var(--surface-2)}
+.pb-right .pz{max-width:960px;margin:0 auto}
+.pb-form section{padding:18px 20px;border-bottom:1px solid var(--line)}
+.pb-form h3{font-size:15px;margin:0 0 12px}
+.pb-form label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-2);margin:10px 0 4px}
+.pb-in{display:flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:10px;padding:0 10px;background:var(--surface)}
+.pb-in input{border:0;padding:8px 0;background:transparent;min-width:0;outline:none}
+.pb-in span{font-size:12px;color:var(--ink-3)}
+.pb-in.big input{font-size:18px;font-weight:700}
+.pb-op{display:grid;grid-template-columns:30px 1fr 1.2fr 1.2fr 30px;gap:8px;align-items:end;padding:8px 0;border-top:1px dashed var(--line)}
+.pb-op small{font-size:11px;color:var(--ink-3)}
+.pb-radio input{display:none}
+.pb-radio span{display:grid;place-items:center;width:28px;height:36px;border-radius:8px;color:var(--ink-3);cursor:pointer;font-size:16px}
+.pb-radio input:checked+span{color:#e2263c;background:rgba(226,38,60,.1)}
+.pb-checks{display:grid;gap:6px}
+.pb-ck{display:flex!important;gap:8px;align-items:flex-start;font-weight:500!important;color:var(--ink)!important;margin:0!important;padding:8px 10px;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.pb-ck:has(input:checked){border-color:#e2263c;background:rgba(226,38,60,.06)}
+.pb-ck input{width:auto;margin-top:2px;accent-color:#e2263c}
+.pb-ref{margin-top:12px;padding:12px;border-radius:12px;background:var(--surface-2);font-size:13px}
+.pb-ref-h{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.pb-rl{display:grid;grid-template-columns:1fr auto;gap:0 8px;padding:6px 0;border-top:1px solid var(--line)}
+.pb-rl small{grid-column:1/-1;color:var(--ink-3)}
+.seg{display:inline-flex;gap:4px;padding:3px;border-radius:12px;background:var(--surface-2);flex-wrap:wrap}
+.seg button{appearance:none;border:0;background:transparent;padding:7px 12px;border-radius:9px;font-family:inherit;font-weight:600;font-size:13px;color:var(--ink-2);cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.2}
+.seg button small{font-weight:500;font-size:11px;color:var(--ink-3)}
+.seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+@media (max-width:900px){.pb-body{grid-template-columns:1fr;overflow-y:auto}.pb-left,.pb-right{overflow:visible}.pb-top select{display:none}.pb-fab{right:16px;bottom:16px}}
+.pb-form .seg{display:grid;grid-template-columns:repeat(4,1fr);width:100%}

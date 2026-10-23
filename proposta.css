@@ -1,0 +1,58 @@
+/* Proposta MedCof 2026 — slides 16:9 dimensionados em cqw (escalam com a largura) */
+.pz{--red:#e2263c;--red-d:#b5162a;--ink:#141416;--mut:#5f6168;--bg:#0e0e10;display:grid;gap:24px;font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+.pz-slide{container-type:inline-size;width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.18);background:#fff}
+.pz-in{position:absolute;inset:0;padding:6cqw 7cqw}
+.pz h1,.pz h2,.pz p{margin:0}
+.pz-capa{background:radial-gradient(120% 140% at 85% 10%,#2a0a10 0%,var(--bg) 55%) ,var(--bg);color:#fff}
+.pz-hurr{position:absolute;left:-14cqw;bottom:-22cqw;width:62cqw;opacity:.95;filter:drop-shadow(0 2cqw 4cqw rgba(226,38,60,.35))}
+.pz-end .pz-hurr{left:auto;right:-12cqw;bottom:-20cqw;width:56cqw}
+.pz-logo{position:absolute;top:5.5cqw;right:7cqw;width:20cqw}
+.pz-end .pz-logo{right:auto;left:7cqw}
+.pz-capa-txt{position:absolute;right:7cqw;top:52%;transform:translateY(-50%);text-align:right;max-width:54cqw}
+.pz-end .pz-capa-txt{right:auto;left:7cqw;text-align:left}
+.pz-kicker{font-size:1.5cqw;letter-spacing:.32em;text-transform:uppercase;color:#ff9aa6;font-weight:600;margin-bottom:1.6cqw}
+.pz-capa h1{font-size:7.4cqw;line-height:1;letter-spacing:-.04em;font-weight:800}
+.pz-capa h1 span{color:var(--red)}
+.pz-sub{font-size:1.9cqw;color:rgba(255,255,255,.72);margin-top:1.8cqw;line-height:1.35}
+.pz-slogan{position:absolute;right:7cqw;bottom:5cqw;font-size:1.45cqw;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.pz-end .pz-slogan{right:auto;left:7cqw}
+
+.pz-light{background:#fff}
+.pz-light::after{content:"";position:absolute;right:-9cqw;bottom:-11cqw;width:30cqw;aspect-ratio:1;background:url(/img/furacao-vermelho.png) center/contain no-repeat;opacity:.08}
+.pz-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:3.4cqw}
+.pz-h img{width:13cqw}
+.pz-tag{display:inline-block;font-size:1.35cqw;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--red);background:rgba(226,38,60,.09);padding:.8cqw 1.6cqw;border-radius:99cqw}
+.pz-tag-w{color:#fff;background:rgba(255,255,255,.16)}
+.pz h2{font-size:4.1cqw;line-height:1.06;letter-spacing:-.035em;font-weight:800;max-width:70cqw;margin-bottom:3.4cqw}
+.pz-list{list-style:none;margin:0;padding:0;display:grid;gap:1.9cqw;max-width:74cqw}
+.pz-list li{display:flex;gap:1.8cqw;align-items:flex-start;font-size:2.15cqw;line-height:1.32;color:#2a2b30}
+.pz-dot{flex:none;width:1.25cqw;height:1.25cqw;border-radius:50%;background:var(--red);margin-top:.85cqw;box-shadow:0 0 0 .55cqw rgba(226,38,60,.14)}
+.pz-cols3{display:grid;grid-template-columns:repeat(3,1fr);gap:2.2cqw}
+.pz-card{background:#f6f6f7;border-radius:2cqw;padding:2.6cqw}
+.pz-card b{display:block;font-size:2.1cqw;letter-spacing:-.02em;margin-bottom:1cqw}
+.pz-card p{font-size:1.6cqw;line-height:1.45;color:var(--mut)}
+
+.pz-invest{background:linear-gradient(135deg,var(--red) 0%,var(--red-d) 100%);color:#fff}
+.pz-invest::after{content:"";position:absolute;right:-10cqw;top:-12cqw;width:36cqw;aspect-ratio:1;background:url(/img/furacao-branco.png) center/contain no-repeat;opacity:.08}
+.pz-invest h2{max-width:60cqw}
+.pz-ops{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:1.8cqw;position:relative;z-index:1}
+.pz-op{position:relative;background:rgba(255,255,255,.1);border:.15cqw solid rgba(255,255,255,.22);border-radius:2cqw;padding:2.4cqw 2cqw;backdrop-filter:blur(4px)}
+.pz-op.on{background:#fff;color:var(--ink);border-color:#fff;transform:translateY(-1cqw);box-shadow:0 2cqw 4cqw rgba(0,0,0,.2)}
+.pz-best{position:absolute;top:-1.3cqw;left:2cqw;background:var(--ink);color:#fff;font-size:1.1cqw;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.6cqw 1.2cqw;border-radius:99cqw}
+.pz-dur{font-size:2.5cqw;font-weight:800;letter-spacing:-.02em}
+.pz-per{font-size:1.25cqw;opacity:.75;margin-top:.5cqw;min-height:3.2cqw;line-height:1.3}
+.pz-tot{white-space:nowrap;font-size:min(3.4cqw,calc(12.5cqw / var(--n)));font-weight:800;letter-spacing:-.03em;margin-top:1.6cqw}
+.pz-op.on .pz-tot{color:var(--red)}
+.pz-an{font-size:1.3cqw;opacity:.8;margin-top:.4cqw}
+.pz-foot{position:absolute;left:7cqw;right:7cqw;bottom:4.6cqw;font-size:1.3cqw;opacity:.85}
+
+@media print{
+  @page{size:16in 9in;margin:0}
+  html,body{background:#fff!important;margin:0;padding:0}
+  .pz{gap:0}
+  .pz-slide{width:16in;height:9in;aspect-ratio:auto;border-radius:0;box-shadow:none;break-after:page;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .no-print{display:none!important}
+}
+.pz-invest .pz-h{margin-bottom:2.6cqw}
+.pz-invest h2{margin-bottom:3.2cqw}
+.pz-invest .pz-foot{bottom:3.4cqw}
