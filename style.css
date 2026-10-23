@@ -458,3 +458,17 @@ input::placeholder,textarea::placeholder{color:var(--ink-3)}
 .rot-step>b{font-size:14px}
 .rot-step>p{margin:4px 0 6px;font-size:12.5px;color:var(--ink-3)}
 .rot-ev{display:grid;grid-template-columns:2fr 1fr 1.3fr 32px;gap:6px;margin-bottom:6px}
+.pb-ref{padding:0;background:transparent}
+.pb-ref-btn{width:100%;display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);color:var(--ink);font:inherit;font-weight:600;cursor:pointer}
+.pb-ref-btn .pill{font-size:11px;padding:1px 8px;border-radius:99px;background:var(--line);color:var(--ink-2)}
+.pb-ref-body{display:grid;gap:8px;margin-top:8px}
+.pb-ri{padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.pb-ri-t{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pb-tag{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+.pb-ri-n{font-size:13px;margin-top:2px}
+.pb-ri small{display:block;color:var(--ink-3);font-size:12px;margin-top:2px}
+.pb-ri-a{margin-top:8px}
+.pb-op{grid-template-columns:30px 1.1fr 1.2fr 1.2fr 30px}
+.pb-op .pb-in input{width:100%}
+.cfg textarea{width:100%;font-size:13.5px;line-height:1.5}
+.cfg label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-2);margin:10px 0 4px}

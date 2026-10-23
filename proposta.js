@@ -5,13 +5,6 @@
   const brl = (n) => "R$ " + Math.round(Number(n) || 0).toLocaleString("pt-BR");
   const MES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
 
-  /* Tabela padrão: valor anual por porte (alunos cobertos pelo CA) */
-  const PORTES = [
-    { id: "P", nome: "Porte P", ate: 400, anual: 4000, desc: "até 400 alunos" },
-    { id: "M", nome: "Porte M", ate: 800, anual: 6000, desc: "401 a 800 alunos" },
-    { id: "G", nome: "Porte G", ate: 1200, anual: 8000, desc: "801 a 1.200 alunos" },
-    { id: "GG", nome: "Porte GG", ate: Infinity, anual: 10000, desc: "mais de 1.200 alunos" },
-  ];
   /* Quanto mais tempo, maior o valor anual (padrão da proposta Unirg: 4k → 5k → 6k → 6,5k) */
   const DURACOES = [
     { meses: 12, fator: 1 },
@@ -19,7 +12,7 @@
     { meses: 24, fator: 1.5 },
     { meses: 30, fator: 1.625 },
   ];
-  const porteDe = (alunos) => PORTES.find((p) => (Number(alunos) || 0) <= p.ate) || PORTES[1];
+  const fatorDe = (m) => { const d = DURACOES.find((x) => x.meses === Number(m)); return d ? d.fator : Math.max(0.5, 1 + ((Number(m) || 12) - 12) * 0.5 / 12); };
   const arred = (v, passo = 50) => Math.round(v / passo) * passo;
 
   function addMeses(iso, m) {
@@ -64,7 +57,6 @@
   ];
 
   function defaults(c = {}) {
-    const p = porteDe(c.alunos_cobertos);
     const inicio = new Date(); inicio.setDate(1); inicio.setMonth(inicio.getMonth() + 1);
     const ini = inicio.toISOString().slice(0, 10);
     return {
@@ -73,11 +65,10 @@
       nome_ca: c.nome || "",
       faculdade: c.faculdade || "",
       cidade: c.cidade ? `${c.cidade}${c.uf ? "/" + c.uf : ""}` : "",
-      porte: p.id,
       inicio: ini,
-      anual_base: p.anual,
-      opcoes: gerarOpcoes(p.anual, ini),
-      destaque: 2,
+      anual_base: "",
+      opcoes: [{ meses: 12, anual: "", total: "" }, { meses: 24, anual: "", total: "" }],
+      destaque: 1,
       pagamento: "Parcelas semestrais; a 1ª em até 30 dias após a assinatura.",
       medcof: [...ENTREGA_MEDCOF],
       ca: [...ENTREGA_CA],
@@ -162,6 +153,6 @@
     return `<div class="pz">${capa}${parceria}${medcof}${ca}${eventos}${invest}${fim}</div>`;
   }
 
-  window.Proposta = { PORTES, DURACOES, porteDe, gerarOpcoes, recalcula, defaults, render, addMeses, mesAno, anosTxt, brl,
+  window.Proposta = { DURACOES, fatorDe, gerarOpcoes, recalcula, defaults, render, addMeses, mesAno, anosTxt, brl,
     ENTREGA_MEDCOF, ENTREGA_MEDCOF_EXTRAS, ENTREGA_CA, ENTREGA_CA_EXTRAS };
 })();
