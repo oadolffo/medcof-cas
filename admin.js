@@ -59,7 +59,7 @@ async function renderMapa() {
     if (e) { if (!relacao.has(e.id)) relacao.set(e.id, []); relacao.get(e.id).push(c); } else semEscola.push(c);
   }
   const relOf = (e) => { const cs = relacao.get(e.id) || []; if (cs.some((c) => c.status === "ativa")) return "ativa"; if (cs.some((c) => NEGOCIACAO.includes(c.status))) return "negociacao"; if (cs.length) return "antiga"; return "nenhuma"; };
-  const COR = { ativa: "#16a34a", negociacao: "#f59e0b", antiga: "#94a3b8", nenhuma: "#6366f1" };
+  const COR = { ativa: "#30d158", negociacao: "#ff9f0a", antiga: "#8e8e93", nenhuma: "#0a84ff" };
   const REL_L = { ativa: "Parceria ativa", negociacao: "Em negociação / interesse", antiga: "Já foi parceiro", nenhuma: "Sem relação ainda" };
   const reg = ["Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"];
   const stats = reg.map((r) => { const es = escolas.filter((e) => e.regiao === r); const at = es.filter((e) => relOf(e) === "ativa"); return { r, n: es.length, vagas: es.reduce((a, e) => a + (e.vagas || 0), 0), ativas: at.length, vagasAt: at.reduce((a, e) => a + (e.vagas || 0), 0), neg: es.filter((e) => relOf(e) === "negociacao").length }; });
@@ -93,8 +93,11 @@ async function renderMapa() {
   ${semEscola.length ? `<p class="small muted">CAs sem escola identificada no mapa: ${semEscola.map((c) => `<a href="#" onclick="openCA('${c.id}','dados');return false">${esc(c.sigla)}</a>`).join(", ")} — confira cidade/UF/faculdade no cadastro.</p>` : ""}`;
 
   if (MAP) { MAP.remove(); MAP = null; }
-  MAP = L.map("map", { scrollWheelZoom: true }).setView([-14.5, -51.5], 4);
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", { attribution: "© OpenStreetMap · © CARTO", maxZoom: 18 }).addTo(MAP);
+  const BR = L.latLngBounds([[-34.2, -74.5], [5.6, -32.3]]);
+  MAP = L.map("map", { scrollWheelZoom: true, minZoom: 3, maxBounds: BR.pad(0.6), zoomSnap: 0.25 });
+  MAP.fitBounds(BR, { padding: [10, 10] });
+  L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap", maxZoom: 18 }).addTo(MAP);
+  setTimeout(() => MAP.invalidateSize(), 150);
   window._mapMarkers = {};
   const list = filtradas().sort((a, b) => (b.vagas || 0) - (a.vagas || 0));
   for (const e of list) {

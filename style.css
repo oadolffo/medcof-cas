@@ -225,3 +225,151 @@ table.tbl{width:100%;border-collapse:collapse;font-size:14px}
 .ca-tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line);margin-bottom:18px}
 .ca-tabs button{border:0;background:none;padding:10px 12px;font:inherit;font-weight:600;color:var(--ink-3);cursor:pointer;border-bottom:2px solid transparent}
 .ca-tabs button.on{color:var(--brand);border-bottom-color:var(--brand)}
+
+/* =====================================================================
+   v3 — visual moderno (inspirado no iOS/macOS): tipografia do sistema,
+   superfícies limpas, cantos generosos, azul de sistema, vidro fosco.
+   ===================================================================== */
+:root{
+  --brand:#0071e3; --brand-2:#5e5ce6; --brand-ink:#fff;
+  --bg:#f5f5f7; --surface:#ffffff; --surface-2:#f2f2f7; --line:rgba(0,0,0,.08);
+  --ink:#1d1d1f; --ink-2:#424245; --ink-3:#86868b;
+  --ok:#1f8a3b; --ok-bg:#e3f6e8; --warn:#b25000; --warn-bg:#fff1df; --bad:#d70015; --bad-bg:#ffe5e8; --info:#0066cc; --info-bg:#e6f0fb;
+  --radius:18px; --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(0,0,0,.05);
+  --glass:rgba(255,255,255,.72);
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Inter","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --brand:#0a84ff; --brand-2:#5e5ce6;
+  --bg:#000000; --surface:#1c1c1e; --surface-2:#2c2c2e; --line:rgba(255,255,255,.10);
+  --ink:#f5f5f7; --ink-2:#d1d1d6; --ink-3:#8e8e93;
+  --ok:#30d158; --ok-bg:rgba(48,209,88,.16); --warn:#ff9f0a; --warn-bg:rgba(255,159,10,.16); --bad:#ff453a; --bad-bg:rgba(255,69,58,.16); --info:#64d2ff; --info-bg:rgba(100,210,255,.14);
+  --shadow:none; --glass:rgba(28,28,30,.72); color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --brand:#0a84ff; --brand-2:#5e5ce6;
+  --bg:#000000; --surface:#1c1c1e; --surface-2:#2c2c2e; --line:rgba(255,255,255,.10);
+  --ink:#f5f5f7; --ink-2:#d1d1d6; --ink-3:#8e8e93;
+  --ok:#30d158; --ok-bg:rgba(48,209,88,.16); --warn:#ff9f0a; --warn-bg:rgba(255,159,10,.16); --bad:#ff453a; --bad-bg:rgba(255,69,58,.16); --info:#64d2ff; --info-bg:rgba(100,210,255,.14);
+  --shadow:none; --glass:rgba(28,28,30,.72); color-scheme:dark;
+}
+body{font-family:var(--font);font-size:15px;letter-spacing:-.008em;background:var(--bg)}
+h1,h2,h3{font-weight:700;letter-spacing:-.025em}
+::selection{background:color-mix(in srgb,var(--brand) 25%,transparent)}
+
+/* botões: pílulas */
+.btn{border:0;background:var(--surface-2);color:var(--ink);border-radius:980px;padding:9px 16px;font-weight:600;transition:background .15s,transform .1s,filter .15s}
+.btn:hover{border:0;background:color-mix(in srgb,var(--ink) 9%,var(--surface-2))}
+.btn:active{transform:scale(.97)}
+.btn.primary{background:var(--brand);color:#fff}
+.btn.primary:hover{background:var(--brand);filter:brightness(1.08)}
+.btn.ghost{background:transparent}
+.btn.ghost:hover{background:var(--surface-2)}
+.btn.danger{color:var(--bad)}
+.btn.sm{padding:6px 12px;font-size:13px;border-radius:980px}
+.btn:focus-visible,.nav:focus-visible,.tab:focus-visible{outline:3px solid color-mix(in srgb,var(--brand) 45%,transparent);outline-offset:2px}
+
+/* campos */
+label{font-size:12.5px;font-weight:600;color:var(--ink-3);letter-spacing:0}
+input,select,textarea{background:var(--surface-2);border:1px solid transparent;border-radius:12px;padding:11px 13px;transition:box-shadow .15s,border-color .15s,background .15s}
+input:focus,select:focus,textarea:focus{outline:none;background:var(--surface);border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 18%,transparent)}
+input::placeholder,textarea::placeholder{color:var(--ink-3)}
+
+/* cartões */
+.card,.kpi,.benefit,.path,.tbl-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+:root:not([data-theme="dark"]) .card,:root:not([data-theme="dark"]) .kpi,:root:not([data-theme="dark"]) .path,:root:not([data-theme="dark"]) .tbl-wrap{border-color:transparent}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .card,:root:not([data-theme="light"]) .kpi,:root:not([data-theme="light"]) .path,:root:not([data-theme="light"]) .tbl-wrap{border-color:var(--line)}}
+.card{padding:22px}
+
+/* selos */
+.badge{font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:980px;letter-spacing:0}
+.b-novo{background:var(--info-bg);color:var(--info)}
+.b-contato,.b-reuniao{background:color-mix(in srgb,var(--brand-2) 14%,transparent);color:var(--brand-2)}
+.b-interesse{background:color-mix(in srgb,#32ade6 16%,transparent);color:#0a84c8}
+.b-encerrada{text-decoration:none;background:var(--surface-2);color:var(--ink-3)}
+.alert{border-radius:14px;padding:12px 16px}
+.toast{background:var(--glass);color:var(--ink);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border:1px solid var(--line);border-radius:980px;padding:11px 20px;box-shadow:0 10px 40px rgba(0,0,0,.18)}
+
+/* topo público: barra de vidro */
+.pub-top{position:sticky;top:0;z-index:20;padding:12px 0;background:var(--glass);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+.logo{font-weight:700;letter-spacing:-.03em}
+.logo b{color:var(--brand)}
+.hero{padding:64px 0 36px}
+.hero h1{font-size:clamp(36px,6vw,64px);letter-spacing:-.045em;line-height:1.04;font-weight:700}
+.hero p.lead{font-size:clamp(17px,2vw,21px);color:var(--ink-3);line-height:1.45}
+.grad{background:linear-gradient(90deg,var(--brand),var(--brand-2) 70%)}
+.path{padding:26px;gap:10px;transition:transform .2s,box-shadow .2s}
+.path:hover{transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.08);border-color:transparent}
+.path .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--brand) 12%,transparent);font-size:22px}
+.path h3{font-size:21px}
+.path .go{color:var(--brand)}
+.step{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow)}
+.step::before{background:var(--brand)}
+.benefit .ic{border-radius:12px;background:color-mix(in srgb,var(--brand) 12%,transparent)}
+.form-sec{border-top:1px solid var(--line)}
+.footer{color:var(--ink-3)}
+
+/* painel: barra lateral de vidro */
+.app{grid-template-columns:248px 1fr}
+.side{background:var(--glass);backdrop-filter:saturate(180%) blur(24px);-webkit-backdrop-filter:saturate(180%) blur(24px);border-right:1px solid var(--line);padding:20px 12px;gap:2px;overflow-y:auto}
+.side .logo{padding:4px 12px 18px;font-size:19px}
+.nav{gap:11px;padding:8px 12px;border-radius:10px;color:var(--ink-2);font-weight:500;font-size:14.5px}
+.nav svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+.nav:hover{background:color-mix(in srgb,var(--ink) 6%,transparent)}
+.nav.on{background:var(--brand);color:#fff}
+.nav.on svg{opacity:1}
+.nav .count{background:var(--bad);font-weight:600;font-size:11px;min-width:20px;text-align:center;padding:1px 6px}
+.nav.on .count{background:#fff;color:var(--brand)}
+.side .sep{height:1px;background:var(--line);margin:10px 12px}
+.side .grp{font-size:11px;font-weight:600;color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em;padding:10px 12px 4px}
+.main{padding:30px 34px}
+.topbar{margin-bottom:22px}
+.topbar h1{font-size:30px;letter-spacing:-.035em}
+.mobile-nav{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
+.mobile-nav .nav.on{background:var(--brand);color:#fff}
+.kpis{gap:14px}
+.kpi{padding:18px 20px;display:flex;flex-direction:column-reverse;gap:4px}
+.kpi .v{font-size:34px;font-weight:700;letter-spacing:-.04em;line-height:1.05;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:12.5px;font-weight:500;color:var(--ink-3)}
+.two{gap:16px}
+.li{padding:12px 0;border-bottom:1px solid var(--line);transition:background .12s}
+.li:hover{background:color-mix(in srgb,var(--ink) 3%,transparent);margin:0 -10px;padding-left:10px;padding-right:10px;border-radius:10px}
+.fbar .track{height:8px;border-radius:99px}
+.fbar .fill{border-radius:99px;background:linear-gradient(90deg,var(--brand),var(--brand-2))}
+.prog{height:6px}
+.prog>span{background:linear-gradient(90deg,var(--brand),var(--brand-2))}
+
+/* tabelas */
+.tbl th{text-transform:none;letter-spacing:0;font-size:12.5px;font-weight:600;color:var(--ink-3);padding:12px 14px}
+.tbl td{padding:13px 14px}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tr.click:hover td{background:color-mix(in srgb,var(--ink) 3%,transparent)}
+
+/* abas como controle segmentado */
+.tabs{background:var(--surface-2);padding:3px;border-radius:12px;display:inline-flex;max-width:100%}
+.tab{border-radius:9px;padding:6px 14px;color:var(--ink-2);font-weight:500;font-size:14px}
+.tab.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.ca-tabs{border-bottom:0;background:var(--surface-2);padding:3px;border-radius:12px;display:inline-flex;flex-wrap:wrap}
+.ca-tabs button{border-bottom:0;border-radius:9px;padding:7px 14px;font-weight:500;color:var(--ink-2)}
+.ca-tabs button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+/* gaveta e modal */
+.overlay,.modal{background:rgba(0,0,0,.32);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.drawer{background:var(--bg);border-radius:22px 0 0 22px;box-shadow:-20px 0 60px rgba(0,0,0,.18)}
+.drawer-head{background:var(--glass);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line);padding:18px 22px}
+.drawer-body{padding:22px}
+.modal>.card{border-radius:22px;box-shadow:0 30px 80px rgba(0,0,0,.25)}
+.kanban .col{background:var(--surface-2);border-radius:var(--radius)}
+.kcard{border-radius:14px;border-color:transparent}
+.chip{border-radius:980px;background:var(--surface-2);border-color:transparent}
+.chip:has(input:checked){background:color-mix(in srgb,var(--brand) 14%,var(--surface));border-color:var(--brand)}
+.auth{background:radial-gradient(1200px 600px at 50% -10%,color-mix(in srgb,var(--brand) 14%,transparent),transparent)}
+.auth .card{border-radius:24px;padding:30px}
+.ac-box{border-radius:14px;border:1px solid var(--line);box-shadow:0 16px 40px rgba(0,0,0,.14)}
+.ac-box button{padding:10px 12px}
+.score{border-radius:10px}
+.map{border-radius:var(--radius);border:1px solid var(--line)}
+:root[data-theme="dark"] .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.9) contrast(.9)}}
+.leaflet-container{font-family:var(--font)}
+.leaflet-popup-content-wrapper{border-radius:14px}
