@@ -1,5 +1,5 @@
 /* Proposta MedCof 2026 — slides 16:9 dimensionados em cqw (escalam com a largura) */
-.pz{--red:#e2263c;--red-d:#b5162a;--ink:#141416;--mut:#5f6168;--bg:#0e0e10;display:grid;gap:24px;font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
+.pz{color-scheme:only light;--red:#e2263c;--red-d:#b5162a;--ink:#141416;--mut:#5f6168;--bg:#0e0e10;display:grid;gap:24px;font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink)}
 .pz-slide{container-type:inline-size;width:100%;aspect-ratio:16/9;position:relative;overflow:hidden;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.18);background:#fff}
 .pz-in{position:absolute;inset:0;padding:6cqw 7cqw}
 .pz h1,.pz h2,.pz p{margin:0}
