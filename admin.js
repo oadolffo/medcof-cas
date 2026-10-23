@@ -309,3 +309,63 @@ window.EXTRA_TABS = {
     <div class="list card" style="padding:6px 14px">${rs.map((r) => `<div class="li" onclick="openReuniao('${r.id}')"><span>🤝</span><div style="flex:1"><div class="t">${esc(r.titulo)}</div><div class="small muted">${fmtDateTime(r.data_hora)}${r.ata ? " · com ata" : ""}</div></div><span class="badge ${REU_B[r.status]}">${REU_ST[r.status]}</span></div>`).join("") || `<div class="empty">Nenhuma reunião</div>`}</div>`;
   },
 };
+
+/* ===================== VISÃO GERAL v3 (enxuta) ===================== */
+const ICO = {
+  ev: '<path d="M8 3v4M16 3v4"/><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18"/>',
+  ct: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
+  post: '<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/>',
+  reu: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M17 11a3 3 0 1 0 0-6M21.5 20a5 5 0 0 0-4-4.9"/>',
+  new: '<path d="M12 5v14M5 12h14"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M3 7l9 6 9-6"/>',
+};
+const svgI = (k) => `<svg viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`;
+function renderHomeV3() {
+  const nome = (S.me?.nome || "").split(" ")[0] || "";
+  const h = new Date().getHours();
+  const saud = h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+  const ativos = S.cas.filter((c) => c.status === "ativa");
+  const alunos = ativos.reduce((a, c) => a + (c.alunos_cobertos || 0), 0);
+  const pend = S.eventos.filter((e) => e.status === "pendente" && daysUntil(e.data_inicio) >= -1);
+  const venc = (S.contratos || []).filter((k) => { const d = daysUntil(k.vigencia_fim); return d !== null && d >= 0 && d <= 60; });
+
+  // tudo que pede ação, numa lista só, por urgência
+  const acts = [];
+  pend.forEach((e) => { const c = caById(e.centro_id) || {}; const d = daysUntil(e.data_inicio); acts.push({ k: "ev", tone: "warn", w: d, t: `Analisar evento: ${e.nome}`, s: `${c.sigla || ""} · ${fmtDate(e.data_inicio)}${d >= 0 ? ` · em ${d} dias` : ""}`, on: `openEvento('${e.id}')` }); });
+  (S.reunioes || []).filter((r) => r.status === "solicitada").forEach((r) => { const c = caById(r.centro_id) || {}; acts.push({ k: "reu", tone: "brand", w: 0, t: `${c.sigla || "CA"} pediu uma reunião`, s: `${r.titulo} · sugestão ${fmtDateTime(r.data_hora)}`, on: `openReuniao('${r.id}')` }); });
+  venc.forEach((k) => { const c = caById(k.centro_id) || {}; const d = daysUntil(k.vigencia_fim); acts.push({ k: "ct", tone: d <= 15 ? "bad" : "warn", w: d, t: `Renovar contrato do ${c.sigla || ""}`, s: `vence em ${d} dias · ${fmtDate(k.vigencia_fim)}`, on: `openCA('${k.centro_id}','contrato')` }); });
+  atrasos().forEach((x) => acts.push({ k: "post", tone: x.dias <= 3 ? "bad" : "warn", w: x.dias, t: `${x.c.sigla}: falta ${x.falta} ${(TIPOS_POST[x.tipo] || x.tipo).toLowerCase()}`, s: x.dias < 0 ? "prazo vencido" : `vence em ${x.dias} dias`, on: `openCA('${x.c.id}','postagens')` }));
+  (S.posts || []).filter((p) => p.status === "enviado").slice(0, 3).forEach((p) => { const c = caById(p.centro_id) || {}; acts.push({ k: "post", tone: "brand", w: 30, t: `Validar post do ${c.sigla || ""}`, s: `${TIPOS_POST[p.tipo] || p.tipo} · ${fmtDate(p.data_post)}`, on: `go('postagens')` }); });
+  S.cas.filter((c) => c.status === "interesse").forEach((c) => acts.push({ k: "new", tone: "ok", w: 20, t: `Novo interessado: ${c.sigla}`, s: `${c.faculdade || ""} · ${c.cidade || ""}/${c.uf || ""}`, on: `openCA('${c.id}')` }));
+  acts.sort((a, b) => (a.w ?? 99) - (b.w ?? 99));
+
+  // agenda: eventos aprovados/pendentes + reuniões nos próximos 21 dias
+  const ag = [
+    ...S.eventos.filter((e) => { const d = daysUntil(e.data_inicio); return d !== null && d >= 0 && d <= 21 && !["recusado", "cancelado"].includes(e.status); })
+      .map((e) => ({ when: new Date(e.data_inicio + "T12:00:00"), t: e.nome, s: `${(caById(e.centro_id) || {}).sigla || ""} · ${e.publico_estimado ?? "?"} pessoas`, tag: e.status === "pendente" ? "em análise" : "evento", on: `openEvento('${e.id}')` })),
+    ...(S.reunioes || []).filter((r) => r.status === "agendada" && new Date(r.data_hora) >= new Date() && (new Date(r.data_hora) - Date.now()) / 864e5 <= 21)
+      .map((r) => ({ when: new Date(r.data_hora), t: r.titulo, s: `${(caById(r.centro_id) || {}).sigla || ""} · ${new Date(r.data_hora).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}`, tag: "reunião", on: `openReuniao('${r.id}')` })),
+  ].sort((a, b) => a.when - b.when);
+  const MES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+
+  $("#main").innerHTML = `
+  <div class="hello"><div><p class="date">${new Date().toLocaleDateString("pt-BR", { weekday: "long", day: "numeric", month: "long" })}</p><h1>${saud}${nome ? ", " + esc(nome) : ""}</h1></div>
+    <span class="spacer"></span>${canWrite() ? `<button class="btn" onclick="openNewCA()">Novo CA</button>` : ""}</div>
+  <div class="stats">
+    <button class="stat" onclick="go('cas')"><span class="l">Parcerias ativas</span><span class="v">${ativos.length}</span></button>
+    <button class="stat" onclick="go('mapa')"><span class="l">Alunos alcançados</span><span class="v">${alunos.toLocaleString("pt-BR")}</span></button>
+    <button class="stat" onclick="S.evFilters.status='pendente';S.evFilters.periodo='todos';go('eventos')"><span class="l">Eventos para analisar</span><span class="v ${pend.length ? "warn" : ""}">${pend.length}</span></button>
+    <button class="stat" onclick="CTF.sit='vencendo';go('contratos')"><span class="l">Contratos vencendo</span><span class="v ${venc.length ? "warn" : ""}">${venc.length}</span></button>
+  </div>
+  <div class="home-grid">
+    <section class="panel"><div class="ph"><h2>Precisa de você</h2><span class="pill">${acts.length}</span></div>
+      ${acts.length ? `<div class="acts">${acts.slice(0, 8).map((a) => `<button class="act" onclick="${a.on}"><span class="ai t-${a.tone}">${svgI(a.k)}</span><span class="ab"><b>${esc(a.t)}</b><small>${esc(a.s)}</small></span><span class="chev">›</span></button>`).join("")}</div>
+        ${acts.length > 8 ? `<p class="more">+ ${acts.length - 8} itens</p>` : ""}` : `<div class="zero"><div class="zi">✓</div><b>Tudo em dia</b><small>Nada pendente agora.</small></div>`}
+    </section>
+    <section class="panel"><div class="ph"><h2>Agenda</h2><span class="muted small">próximas 3 semanas</span></div>
+      ${ag.length ? `<div class="agenda">${ag.slice(0, 8).map((x) => `<button class="ag" onclick="${x.on}"><span class="d"><b>${String(x.when.getDate()).padStart(2, "0")}</b>${MES[x.when.getMonth()]}</span><span class="ab"><b>${esc(x.t)}</b><small>${esc(x.s)}</small></span><span class="tag">${x.tag}</span></button>`).join("")}</div>`
+        : `<div class="zero"><div class="zi">☀</div><b>Agenda livre</b><small>Sem eventos ou reuniões nas próximas semanas.</small></div>`}
+    </section>
+  </div>`;
+}
+window.EXTRA_VIEWS.home = renderHomeV3;
