@@ -232,11 +232,54 @@ function renderReunioes() {
   <div class="two"><div class="card"><h3 style="font-size:16px">Próximas e solicitadas</h3>${fut.map(line).join("") || `<div class="empty">Nenhuma</div>`}</div>
   <div class="card"><h3 style="font-size:16px">Anteriores</h3>${pas.map(line).join("") || `<div class="empty">—</div>`}</div></div>`;
 }
-function openReuniao(id, centroId) {
+/* Roteiro padrão de reunião com CA (fluxo da equipe) — fica só para a equipe, o CA não vê */
+const NECESSIDADES = ["Dinheiro", "Brindes", "Conteúdo", "Simulado", "Palestra", "Premiação", "Acesso à plataforma MedCof"];
+function roteiroForm(d = {}) {
+  const f = d.faculdade || {}, ca = d.ca || {}, rd = d.redes || {};
+  const evs = (d.eventos && d.eventos.length ? d.eventos : [{}, {}]);
+  const evRow = (e = {}) => `<div class="rot-ev"><input name="ev_nome" placeholder="Evento" value="${esc(e.nome || "")}"><input name="ev_publico" type="number" min="0" placeholder="Público" value="${e.publico ?? ""}"><input name="ev_data" placeholder="Quando (ex.: maio)" value="${esc(e.data || "")}"><button type="button" class="btn sm ghost" onclick="this.parentElement.remove()" aria-label="Remover">✕</button></div>`;
+  const sel = (name, v, ops) => `<select name="${name}"><option value="">—</option>${ops.map((o) => `<option ${v === o ? "selected" : ""}>${o}</option>`).join("")}</select>`;
+  return `<details class="rot" ${d && Object.keys(d).length ? "open" : ""}><summary>Roteiro da reunião <span class="muted small">— só a equipe vê</span></summary>
+  <div class="rot-step"><b>1. Redes sociais do CA</b><p>Ver seguidores e desempenho das postagens antes da reunião.</p>
+    <div class="grid g2"><div><label>Seguidores</label><input name="r_seguidores" type="number" min="0" value="${rd.seguidores ?? ""}"></div><div><label>Desempenho dos posts</label><input name="r_desempenho" placeholder="ex.: reels com ~2 mil views" value="${esc(rd.desempenho || "")}"></div></div></div>
+  <div class="rot-step"><b>2. A faculdade</b><p>Quantos alunos, turmas semestrais ou anuais, se tem B2B. Se tiver, perguntar a experiência dos alunos e deixar claro o interesse da MedCof em fechar B2B.</p>
+    <div class="grid g2"><div><label>Alunos de Medicina</label><input name="f_alunos" type="number" min="0" value="${f.alunos ?? ""}"></div><div><label>Turmas</label>${sel("f_turmas", f.turmas, ["Semestrais", "Anuais"])}</div>
+    <div><label>Alunos por turma</label><input name="f_alunos_turma" type="number" min="0" value="${f.alunos_turma ?? ""}"></div><div><label>Tem B2B?</label>${sel("f_b2b", f.b2b, ["Sim", "Não", "Não sabem"])}</div>
+    <div><label>B2B atual (empresa / desde)</label><input name="f_b2b_atual" value="${esc(f.b2b_atual || "")}"></div><div><label>Experiência dos alunos com o B2B</label><input name="f_b2b_feedback" value="${esc(f.b2b_feedback || "")}"></div></div></div>
+  <div class="rot-step"><b>3. O CA na faculdade</b><p>Como o CA se comunica com a faculdade e qual é o papel dele.</p>
+    <div class="grid g2"><div><label>Presidente</label><input name="c_presidente" value="${esc(ca.presidente || "")}"></div><div><label>Vice</label><input name="c_vice" value="${esc(ca.vice || "")}"></div>
+    <div><label>Duração da gestão</label>${sel("c_gestao", ca.gestao, ["Semestral", "1 ano", "2 anos"])}</div><div><label>Contato com a coordenação</label>${sel("c_coord", ca.coordenacao, ["Próximo", "Razoável", "Distante"])}</div></div>
+    <label>Papel do CA / observações</label><textarea name="c_papel" rows="2">${esc(ca.papel || "")}</textarea></div>
+  <div class="rot-step"><b>4. Eventos do ano</b><p>Nome, público e data estimada de cada evento.</p><div id="rotEvs">${evs.map(evRow).join("")}</div>
+    <button type="button" class="btn sm" onclick="document.getElementById('rotEvs').insertAdjacentHTML('beforeend', window.__rotEvRow())">＋ Evento</button></div>
+  <div class="rot-step"><b>5. O que eles precisam</b><div class="chips">${NECESSIDADES.map((n) => `<label class="chip"><input type="checkbox" name="nec" value="${n}" ${(d.necessidades || []).includes(n) ? "checked" : ""}> ${n}</label>`).join("")}</div>
+    <input name="nec_obs" placeholder="Detalhes" value="${esc(d.necessidades_obs || "")}" style="margin-top:8px"></div>
+  <div class="rot-step"><b>6. Onde a MedCof aparece com mais impacto</b><textarea name="impacto" rows="2">${esc(d.impacto || "")}</textarea></div>
+  <div class="rot-step"><b>7. Parceria anual?</b><div class="grid g2"><div>${sel("anual", d.anual, ["Sim", "Talvez", "Só eventos avulsos"])}</div><div></div></div>
+    <label>Próximos passos</label><textarea name="proximos" rows="3">${esc(d.proximos || "")}</textarea></div>
+  </details>`;
+}
+window.__rotEvRow = () => `<div class="rot-ev"><input name="ev_nome" placeholder="Evento"><input name="ev_publico" type="number" min="0" placeholder="Público"><input name="ev_data" placeholder="Quando (ex.: maio)"><button type="button" class="btn sm ghost" onclick="this.parentElement.remove()" aria-label="Remover">✕</button></div>`;
+function lerRoteiro(form) {
+  const v = (n) => (form.elements[n]?.value || "").trim(); const n = (k) => (v(k) === "" ? null : Number(v(k)));
+  const nomes = [...form.querySelectorAll('[name="ev_nome"]')];
+  return {
+    redes: { seguidores: n("r_seguidores"), desempenho: v("r_desempenho") },
+    faculdade: { alunos: n("f_alunos"), turmas: v("f_turmas"), alunos_turma: n("f_alunos_turma"), b2b: v("f_b2b"), b2b_atual: v("f_b2b_atual"), b2b_feedback: v("f_b2b_feedback") },
+    ca: { presidente: v("c_presidente"), vice: v("c_vice"), gestao: v("c_gestao"), coordenacao: v("c_coord"), papel: v("c_papel") },
+    eventos: nomes.map((el) => { const row = el.parentElement; const pub = row.querySelector('[name="ev_publico"]').value; return { nome: el.value.trim(), publico: pub === "" ? null : Number(pub), data: row.querySelector('[name="ev_data"]').value.trim() }; }).filter((e) => e.nome),
+    necessidades: [...form.querySelectorAll('[name="nec"]:checked')].map((x) => x.value), necessidades_obs: v("nec_obs"),
+    impacto: v("impacto"), anual: v("anual"), proximos: v("proximos"),
+  };
+}
+
+async function openReuniao(id, centroId) {
   const r = id ? S.reunioes.find((x) => x.id === id) : { centro_id: centroId || "", titulo: "Reunião de alinhamento", duracao_min: 45, status: "agendada" };
   const local = r.data_hora ? new Date(new Date(r.data_hora).getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16) : "";
   const c = caById(r.centro_id) || {};
-  $("#modalRoot").innerHTML = `<div class="modal" onclick="if(event.target===this)this.remove()"><div class="card" style="max-width:620px">
+  let rot = { dados: {} };
+  if (id) { const { data } = await sb.from("ca_reuniao_roteiro").select("*").eq("reuniao_id", id).maybeSingle(); if (data) rot = data; }
+  $("#modalRoot").innerHTML = `<div class="modal" onclick="if(event.target===this)this.remove()"><div class="card" style="max-width:720px">
   <h2 style="font-size:18px">${id ? "Reunião" : "Agendar reunião"}${r.status === "solicitada" ? ` <span class="badge b-proposta">solicitada pelo CA</span>` : ""}</h2>
   <form id="reuF"><div class="grid g2">
     <div style="grid-column:span 2"><label>CA *</label><select name="centro_id" required ${canWrite() ? "" : "disabled"}><option value="">—</option>${[...S.cas].sort((a, b) => a.sigla.localeCompare(b.sigla)).map((x) => `<option value="${x.id}" ${r.centro_id === x.id ? "selected" : ""}>${esc(x.sigla)} · ${esc(x.faculdade || "")}</option>`).join("")}</select></div>
@@ -244,18 +287,33 @@ function openReuniao(id, centroId) {
     <div><label>Data e hora *</label><input type="datetime-local" name="data_hora" required value="${local}"></div>
     <div><label>Duração (min)</label><input type="number" name="duracao_min" value="${r.duracao_min || 45}"></div>
     <div style="grid-column:span 2"><label>Link (Meet/Zoom) ou local</label><input name="link" value="${esc(r.link || r.local || "")}"></div>
-    <div><label>Status</label><select name="status">${Object.entries(REU_ST).map(([k, l]) => `<option value="${k}" ${r.status === k ? "selected" : ""}>${l}</option>`).join("")}</select></div><div></div>
+    <div><label>Status</label><select name="status">${Object.entries(REU_ST).map(([k, l]) => `<option value="${k}" ${r.status === k ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+    <div><label>Participantes do CA</label><input name="participantes" value="${esc(rot.participantes || "")}" placeholder="ex.: Isadora, William"></div>
     <div style="grid-column:span 2"><label>Pauta</label><textarea name="pauta">${esc(r.pauta || "")}</textarea></div>
-    <div style="grid-column:span 2"><label>Ata / resumo (depois da reunião)</label><textarea name="ata">${esc(r.ata || "")}</textarea></div>
-  </div><div class="row" style="margin-top:14px">${canWrite() ? `<button class="btn primary">${r.status === "solicitada" ? "Confirmar" : "Salvar"}</button>` : ""}
+    <div style="grid-column:span 2"><label>Ata / resumo <span class="muted small">(o CA vê este campo na Área do CA)</span></label><textarea name="ata">${esc(r.ata || "")}</textarea></div>
+  </div>${roteiroForm(rot.dados)}
+  <div class="row" style="margin-top:14px">${canWrite() ? `<button class="btn primary">${r.status === "solicitada" ? "Confirmar" : "Salvar"}</button>` : ""}
     ${id ? `<a class="btn" target="_blank" href="${gcalLink(r, c.sigla)}">📅 Google Agenda</a>` : ""}
     ${id && waLink(c.rep_whatsapp) ? `<a class="btn" target="_blank" href="${waLink(c.rep_whatsapp, `Oi, ${(c.rep_nome || "").split(" ")[0]}! Reunião MedCof × ${c.sigla}: ${fmtDateTime(r.data_hora)}${r.link ? " · " + r.link : ""}. Também aparece na Área do CA: ${location.origin}/ca`)}">💬 Avisar CA</a>` : ""}
+    ${id && canWrite() ? `<button type="button" class="btn" onclick="document.getElementById('modalRoot').innerHTML='';openProposta('${r.centro_id}')">Criar proposta</button>` : ""}
     <span class="spacer"></span>${id && canWrite() ? `<button type="button" class="btn danger sm" onclick="delReuniao('${id}')">Excluir</button>` : ""}</div></form></div></div>`;
   $("#reuF").addEventListener("submit", async (e) => {
     e.preventDefault(); const o = formToObject(e.target);
     const row = { centro_id: o.centro_id, titulo: o.titulo, data_hora: new Date(o.data_hora).toISOString(), duracao_min: +o.duracao_min || 45, link: o.link || null, pauta: o.pauta || null, ata: o.ata || null, status: r.status === "solicitada" && o.status === "solicitada" ? "agendada" : o.status };
-    const { error } = id ? await sb.from("ca_reunioes").update(row).eq("id", id) : await sb.from("ca_reunioes").insert(row);
-    if (error) return toast(errMsg(error));
+    const res = id ? await sb.from("ca_reunioes").update(row).eq("id", id).select().single() : await sb.from("ca_reunioes").insert(row).select().single();
+    if (res.error) return toast(errMsg(res.error));
+    const dados = lerRoteiro(e.target);
+    const temRot = JSON.stringify(dados).replace(/"[^"]*":(""|null|\[\]|\{\})/g, "").replace(/[{},:\[\]"]/g, "").trim().length > 0 || o.participantes;
+    if (temRot) {
+      await sb.from("ca_reuniao_roteiro").upsert({ reuniao_id: res.data.id, centro_id: o.centro_id, participantes: o.participantes || null, dados, updated_at: new Date().toISOString() });
+      // leva o essencial para o cadastro do CA, sem sobrescrever o que já existe
+      const cc = caById(o.centro_id) || {}; const patch = {};
+      if (dados.faculdade.alunos && !cc.alunos_cobertos) patch.alunos_cobertos = dados.faculdade.alunos;
+      if (dados.redes.seguidores) patch.seguidores = dados.redes.seguidores;
+      if (dados.ca.presidente && !cc.rep_nome) { patch.rep_nome = dados.ca.presidente; patch.rep_cargo = cc.rep_cargo || "Presidente"; }
+      if (dados.proximos) patch.proxima_acao = dados.proximos.split("\n")[0].slice(0, 140);
+      if (Object.keys(patch).length) await sb.from("ca_centros").update(patch).eq("id", o.centro_id);
+    }
     await sb.from("ca_atividades").insert({ centro_id: o.centro_id, tipo: "reuniao", descricao: `Reunião ${row.status}: ${row.titulo} · ${fmtDateTime(row.data_hora)}`, autor_id: S.user.id });
     $("#modalRoot").innerHTML = ""; toast("Reunião salva"); refresh();
   });

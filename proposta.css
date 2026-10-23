@@ -56,3 +56,10 @@
 .pz-invest .pz-h{margin-bottom:2.6cqw}
 .pz-invest h2{margin-bottom:3.2cqw}
 .pz-invest .pz-foot{bottom:3.4cqw}
+.pz-evs{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:1.8cqw}
+.pz-ev{background:#f6f6f7;border-radius:2cqw;padding:2.4cqw 2.2cqw;display:flex;flex-direction:column}
+.pz-ev-n{font-size:4.2cqw;font-weight:800;letter-spacing:-.04em;color:var(--red);line-height:1}
+.pz-ev-l{font-size:1.2cqw;color:var(--mut);text-transform:uppercase;letter-spacing:.12em;margin-top:.6cqw!important}
+.pz-ev b{font-size:1.9cqw;margin-top:2cqw;letter-spacing:-.02em;line-height:1.2}
+.pz-ev small{font-size:1.3cqw;color:var(--mut);margin-top:.6cqw}
+.pz-evt{margin-top:2.6cqw!important;font-size:1.8cqw;color:#2a2b30;font-weight:600}

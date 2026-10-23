@@ -451,3 +451,10 @@ input::placeholder,textarea::placeholder{color:var(--ink-3)}
 .seg button.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 @media (max-width:900px){.pb-body{grid-template-columns:1fr;overflow-y:auto}.pb-left,.pb-right{overflow:visible}.pb-top select{display:none}.pb-fab{right:16px;bottom:16px}}
 .pb-form .seg{display:grid;grid-template-columns:repeat(4,1fr);width:100%}
+/* roteiro de reunião */
+.rot{margin-top:14px;border:1px solid var(--line);border-radius:14px;background:var(--surface-2)}
+.rot summary{cursor:pointer;padding:12px 14px;font-weight:700}
+.rot-step{padding:12px 14px;border-top:1px solid var(--line)}
+.rot-step>b{font-size:14px}
+.rot-step>p{margin:4px 0 6px;font-size:12.5px;color:var(--ink-3)}
+.rot-ev{display:grid;grid-template-columns:2fr 1fr 1.3fr 32px;gap:6px;margin-bottom:6px}

@@ -45,6 +45,7 @@
     "Palestra ou ativação da MedCof em eventos do CA",
   ];
   const ENTREGA_MEDCOF_EXTRAS = [
+    "Acesso à plataforma MedCof para a gestão do CA",
     "1 bolsa integral no Extensivo R1 por ano de contrato",
     "Acesso ao curso PS para a gestão do CA",
     "Banner e vídeo institucional da MedCof para os eventos",
@@ -80,6 +81,7 @@
       pagamento: "Parcelas semestrais; a 1ª em até 30 dias após a assinatura.",
       medcof: [...ENTREGA_MEDCOF],
       ca: [...ENTREGA_CA],
+      eventos: [],
       contato: "Adolffo · Coordenação de Parcerias Acadêmicas · Grupo MedCof",
       validade: 15,
     };
@@ -126,6 +128,15 @@
       <h2>O que o ${esc(sigla)} entrega</h2>
       ${lista(d.ca || [])}`);
 
+    const evs = (d.eventos || []).filter((e) => e && e.nome);
+    const eventos = evs.length ? slide("pz-light", `
+      <header class="pz-h"><span class="pz-tag">Eventos</span><img src="${IMG}grupo-medcof-claro.png" alt=""></header>
+      <h2>Onde a MedCof aparece</h2>
+      <div class="pz-evs" style="--n:${Math.min(evs.length, 4)}">${evs.slice(0, 8).map((e) => `<div class="pz-ev">
+        <p class="pz-ev-n">${e.publico ? Number(e.publico).toLocaleString("pt-BR") : "—"}</p><p class="pz-ev-l">${e.publico ? "participantes" : "público a definir"}</p>
+        <b>${esc(e.nome)}</b>${e.data ? `<small>${esc(e.data)}</small>` : ""}</div>`).join("")}</div>
+      ${evs.reduce((a, e) => a + (Number(e.publico) || 0), 0) ? `<p class="pz-evt">${evs.reduce((a, e) => a + (Number(e.publico) || 0), 0).toLocaleString("pt-BR")}+ participantes só nesses eventos.</p>` : ""}`) : "";
+
     const invest = slide("pz-invest", `
       <header class="pz-h"><span class="pz-tag pz-tag-w">Investimento</span><img src="${IMG}grupo-medcof-branco.png" alt=""></header>
       <h2>Quanto mais tempo juntos, maior o investimento.</h2>
@@ -148,7 +159,7 @@
       <div class="pz-capa-txt"><h1>Vamos juntos?</h1><p class="pz-sub">${esc(d.contato || "")}</p></div>
       <p class="pz-slogan">a medicina merece o melhor</p>`);
 
-    return `<div class="pz">${capa}${parceria}${medcof}${ca}${invest}${fim}</div>`;
+    return `<div class="pz">${capa}${parceria}${medcof}${ca}${eventos}${invest}${fim}</div>`;
   }
 
   window.Proposta = { PORTES, DURACOES, porteDe, gerarOpcoes, recalcula, defaults, render, addMeses, mesAno, anosTxt, brl,

@@ -88,6 +88,9 @@
       </section>
       <section><h3>A MedCof entrega</h3>${checks("medcof", P.ENTREGA_MEDCOF, P.ENTREGA_MEDCOF_EXTRAS, D.medcof)}</section>
       <section><h3>O CA entrega</h3>${checks("ca", P.ENTREGA_CA, P.ENTREGA_CA_EXTRAS, D.ca)}</section>
+      <section><h3>Eventos <small class="muted">— página “Onde a MedCof aparece”</small></h3>
+        <p class="small muted" style="margin-top:-6px">Um por linha: nome | público | quando. Vem preenchido pelo roteiro da última reunião. Deixe vazio para não mostrar a página.</p>
+        <textarea name="eventos_txt" rows="4" placeholder="CONCAM | 250 | maio">${esc((D.eventos || []).map((e) => [e.nome, e.publico ?? "", e.data || ""].join(" | ").replace(/( \| )+$/, "")).join("\n"))}</textarea></section>
     </form>`;
   }
 
@@ -99,6 +102,7 @@
     D.anual_base = num(v("anual_base")); D.inicio = v("inicio") || D.inicio; D.pagamento = v("pagamento"); D.validade = Number(v("validade")) || 15; D.contato = v("contato");
     D.opcoes = [...f.querySelectorAll(".pb-op")].map((r) => ({ meses: Number(r.querySelector('[name="meses"]').value) || 12, anual: num(r.querySelector('[name="anual"]').value), total: num(r.querySelector('[name="total"]').value) }));
     const d = f.querySelector('[name="dest"]:checked'); D.destaque = d ? Number(d.value) : 0;
+    D.eventos = v("eventos_txt").split("\n").map((l) => l.split("|").map((x) => x.trim())).filter((a) => a[0]).map(([nome, pub, data]) => ({ nome, publico: pub ? Number(String(pub).replace(/\D/g, "")) || null : null, data: data || "" }));
     for (const k of ["medcof", "ca"]) {
       const marc = [...f.querySelectorAll(`[name="${k}"]:checked`)].map((x) => x.value);
       const extra = v(k + "_extra").split("\n").map((s) => s.trim()).filter(Boolean);
@@ -126,7 +130,7 @@
     f.addEventListener("change", (e) => {
       if (e.target.name !== "centro_id") return;
       const c = caById(e.target.value);
-      if (c) { const n = P.defaults(c); Object.assign(D, { centro_id: c.id, sigla: n.sigla, nome_ca: n.nome_ca, faculdade: n.faculdade, cidade: n.cidade, porte: n.porte, anual_base: n.anual_base, opcoes: n.opcoes }); }
+      if (c) { const n = P.defaults(c); Object.assign(D, { centro_id: c.id, sigla: n.sigla, nome_ca: n.nome_ca, faculdade: n.faculdade, cidade: n.cidade, porte: n.porte, anual_base: n.anual_base, opcoes: n.opcoes }); aplicarRoteiro(c.id); }
       else D.centro_id = null;
       rerender();
     });
@@ -139,6 +143,20 @@
       if (e.target.id === "pbRegen") { readForm(); D.opcoes = P.gerarOpcoes(D.anual_base, D.inicio); D.destaque = 2; redrawOps(); preview(); }
     });
   }
+
+  /* puxa o roteiro da última reunião: alunos (porte), eventos e necessidades */
+  async function aplicarRoteiro(cid) {
+    const { data } = await sb.from("ca_reuniao_roteiro").select("dados,updated_at").eq("centro_id", cid).order("updated_at", { ascending: false }).limit(1);
+    const r = data && data[0] && data[0].dados; if (!r || D.centro_id !== cid) return;
+    readForm();
+    const alunos = r.faculdade && r.faculdade.alunos;
+    if (alunos) { const po = P.porteDe(alunos); D.porte = po.id; D.anual_base = po.anual; D.opcoes = P.gerarOpcoes(po.anual, D.inicio); }
+    if ((r.eventos || []).length) D.eventos = r.eventos.map((e) => ({ nome: e.nome, publico: e.publico, data: e.data || "" }));
+    const plat = "Acesso à plataforma MedCof para a gestão do CA";
+    if ((r.necessidades || []).some((n) => /plataforma/i.test(n)) && !D.medcof.includes(plat)) D.medcof.push(plat);
+    rerender(); toast("Dados da última reunião aplicados");
+  }
+  window.__aplicarRoteiro = aplicarRoteiro;
 
   function rerender() {
     document.getElementById("pbLeft").innerHTML = form();
@@ -153,6 +171,7 @@
     const saved = propostaId && (S.propostas || []).find((p) => p.id === propostaId);
     PID = saved ? saved.id : null;
     D = saved ? JSON.parse(JSON.stringify(saved.dados)) : P.defaults(caById(centroId) || {});
+    if (!saved && centroId) setTimeout(() => aplicarRoteiro(centroId), 0);
     document.getElementById("modalRoot").innerHTML = `<div class="pb" role="dialog" aria-label="Criar proposta">
       <header class="pb-top"><b>Proposta de parceria</b>
         <select id="pbSaved" aria-label="Propostas salvas"><option value="">Nova proposta</option>${savedOptions()}</select>
