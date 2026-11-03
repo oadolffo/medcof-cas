@@ -445,3 +445,49 @@ input::placeholder,textarea::placeholder{color:var(--ink-3)}
 .pb-op .pb-in input{width:100%}
 .cfg textarea{width:100%;font-size:13.5px;line-height:1.5}
 .cfg label{display:block;font-size:12.5px;font-weight:600;color:var(--ink-2);margin:10px 0 4px}
+
+
+/* ===== v4 · layout do painel igual ao Revalida/Congressos: menu superior em pílulas, sem barra lateral ===== */
+.app{display:block;min-height:100vh;max-width:1480px;margin:0 auto;padding:14px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px))}
+.app.hidden{display:none}
+.side,.mobile-nav{display:none!important}
+.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.top .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:16px;letter-spacing:-.3px;color:var(--ink);text-decoration:none;margin-right:auto}
+.top .brand img{width:34px;height:34px;border-radius:9px;background:#e2263c;padding:5px;object-fit:contain}
+.top .brand small{display:block;color:var(--ink-3);font-weight:600;font-size:10px;letter-spacing:1.4px;text-transform:uppercase}
+.pills{display:flex;gap:6px;overflow-x:auto;max-width:100%;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pills button{border:0;background:var(--surface-2);color:var(--ink-3);padding:9px 16px;border-radius:99px;font:600 13px var(--font);white-space:nowrap;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.pills button:hover{color:var(--ink)}
+.pills button.on{background:var(--ink);color:var(--bg)}
+.pills .count{background:var(--brand);color:#fff;border-radius:99px;font-size:10.5px;font-weight:700;padding:1px 7px;min-width:18px;text-align:center}
+.pills button.on .count{background:var(--brand);color:#fff}
+.tools{display:flex;gap:8px;align-items:center}
+.circle{width:38px;height:38px;border-radius:50%;background:var(--surface-2);display:grid;place-items:center;color:var(--ink);border:0;cursor:pointer;text-decoration:none;padding:0}
+.circle svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.circle:hover{background:var(--line)}
+.circle.on{background:var(--ink);color:var(--bg)}
+.circle.me{background:linear-gradient(140deg,var(--brand),#5a1621);color:#fff;font-weight:800;font-size:14px}
+.main{padding:0!important;min-width:0}
+.topbar h1,.hello h1{font-weight:600;letter-spacing:-1px}
+@media (max-width:900px){.top .brand{margin-right:0;flex:1}.pills{order:3;width:100%}}
+@media (max-width:560px){.tools .circle:not(.me){display:none}}
+
+/* cartões no estilo Revalida: superfícies planas, cantos de 20px, sem borda */
+.card,.panel,.kpi,.stat,.tbl-wrap,.path{background:var(--surface);border:0!important;border-radius:20px;box-shadow:none}
+:root[data-theme="light"] .card,:root[data-theme="light"] .panel,:root[data-theme="light"] .kpi,:root[data-theme="light"] .stat,:root[data-theme="light"] .tbl-wrap{box-shadow:0 1px 2px rgba(0,0,0,.04),0 8px 28px rgba(0,0,0,.05)}
+.kpi .v,.stat .v{font-weight:700;letter-spacing:-1.5px}
+.stat:hover{transform:none;background:var(--surface-2)}
+.tbl th{background:var(--surface-2);position:sticky;top:0}
+.tbl tr:nth-child(even) td{background:color-mix(in srgb,var(--ink) 2.5%,transparent)}
+.tabs,.ca-tabs{background:var(--surface-2);border-radius:99px}
+.tab,.ca-tabs button{border-radius:99px}
+.tab.on,.ca-tabs button.on{background:#333;color:var(--ink);box-shadow:none}
+:root[data-theme="light"] .tab.on,:root[data-theme="light"] .ca-tabs button.on{background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.btn{border-radius:99px;font-weight:700}
+.btn.primary{background:var(--brand);border-color:var(--brand)}
+.badge{border-radius:99px}
+.kanban .col{border-radius:20px;background:var(--surface)}
+.kcard{background:var(--surface-2);box-shadow:none}
+.li:hover{background:var(--surface-2)}
+.drawer{background:var(--bg);border-left:1px solid var(--line)}

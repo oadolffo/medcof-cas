@@ -75,7 +75,8 @@ async function boot(session) {
   S.me = me;
   if (me.role === "pending") return show("pendingView");
   show("appView");
-  $("#whoami").textContent = (me.nome || me.email) + " · " + ({ owner: "admin", editor: "editor", viewer: "leitura" }[me.role]);
+  { const w = $("#whoami"); w.textContent = ((me.nome || me.email || "?").trim()[0] || "?").toUpperCase();
+    w.parentElement.title = (me.nome || me.email) + " · " + ({ owner: "admin", editor: "editor", viewer: "leitura" }[me.role]) + " · clique para sair"; }
   $$(".ownerOnly").forEach((el) => el.classList.toggle("hidden", !isOwner()));
   await loadAll();
   const h = location.hash.replace("#", "");
