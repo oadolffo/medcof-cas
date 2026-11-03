@@ -147,6 +147,8 @@ function renderHome() {
       ${!acoes.length && !semCodigo.length ? `<div class="empty">Tudo em dia</div>` : ""}
       </div></div>
   </div>
+  <div class="card" style="margin-top:14px" id="pendCard"><div class="row"><h3 style="margin:0;font-size:16px">Para fazer · Adolffo e Juliana</h3><span class="spacer"></span><span class="muted small">do WhatsApp e dos congressos</span></div>
+    <div class="list" id="pendList"><div class="empty">Carregando…</div></div></div>
   <div class="card" style="margin-top:14px"><h3 style="font-size:16px">Funil de parcerias</h3><div class="funnel">
     ${Object.entries(STATUS_CA).map(([k, l]) => { const n = S.cas.filter((c) => c.status === k).length; const max = Math.max(1, ...Object.keys(STATUS_CA).map((s) => S.cas.filter((c) => c.status === s).length)); return `<div class="fbar"><span>${l}</span><div class="track"><div class="fill" style="width:${(n / max) * 100}%"></div></div><b>${n}</b></div>`; }).join("")}
   </div></div>${window.homeExtra ? window.homeExtra() : ""}`;
@@ -544,3 +546,28 @@ async function atualizarInscritosAdm(id) {
   catch (err) { toast(errMsg(err), 5000); }
 }
 window.atualizarInscritosAdm = atualizarInscritosAdm;
+
+
+// ===== Pendências do Adolffo e da Juliana (arquivo /data/pendencias.json, atualizado pelo Claude) =====
+async function loadPendencias() {
+  const el = document.getElementById("pendList"); if (!el) return;
+  try {
+    const r = await fetch("/data/pendencias.json?v=" + Date.now()); const d = await r.json();
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const itens = (d.itens || []).filter((i) => !i.feito).sort((a, b) => (a.prazo || "9").localeCompare(b.prazo || "9"));
+    const quem = { adolffo: "Adolffo", juliana: "Juliana" };
+    el.innerHTML = itens.length ? itens.map((i) => {
+      const late = i.prazo && new Date(i.prazo + "T00:00") < hoje;
+      const pr = i.prazo ? i.prazo.slice(8, 10) + "/" + i.prazo.slice(5, 7) : "";
+      return `<div class="li" style="cursor:default;align-items:flex-start"><span>${i.prioridade === "alta" ? "🔴" : "📌"}</span>
+        <div style="flex:1"><div class="t">${esc(i.titulo)}</div><div class="small muted">${esc(i.detalhe || "")}</div></div>
+        <span class="badge">${quem[i.para] || esc(i.para)}</span>
+        <span class="small ${late ? "late" : "muted"}" style="min-width:42px;text-align:right">${pr}</span></div>`;
+    }).join("") : `<div class="empty">Tudo em dia</div>`;
+    if (d.atualizado) el.insertAdjacentHTML("beforeend", `<div class="small muted" style="padding-top:8px">Atualizado em ${esc(d.atualizado)}</div>`);
+  } catch (e) { el.innerHTML = `<div class="empty">Não consegui ler as pendências.</div>`; }
+}
+(function () {
+  const orig = renderHome;
+  renderHome = function () { orig(); loadPendencias(); };
+})();

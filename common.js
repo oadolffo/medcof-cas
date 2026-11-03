@@ -74,8 +74,7 @@
     if (t) document.documentElement.dataset.theme = t;
   }
   function toggleTheme() {
-    const cur = document.documentElement.dataset.theme ||
-      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    const cur = document.documentElement.dataset.theme || "dark";
     const next = cur === "dark" ? "light" : "dark";
     document.documentElement.dataset.theme = next;
     try { localStorage.setItem("mc-theme", next); } catch (e) {}
